@@ -27,6 +27,9 @@ class MainActivity : AppCompatActivity() {
         mapView.getMapAsync {
         it.setStyle(Style.MAPBOX_STREETS)
         }
+
+        setSupportActionBar(bottom_app_bar)
+    }
     }
     override fun onStart() {
         super.onStart()

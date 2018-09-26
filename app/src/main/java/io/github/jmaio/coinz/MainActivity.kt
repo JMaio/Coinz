@@ -13,6 +13,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mapView : MapView
+
+    private fun toast(text : String) {
+        val toast = Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT)
+        toast.show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

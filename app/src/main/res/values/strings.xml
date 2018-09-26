@@ -3,4 +3,5 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="app_name" translatable="false">Coinz</string>
+    <string name="app_access_token" translatable="false">"pk.eyJ1Ijoiam1haW8iLCJhIjoiY2ptZmE3ZTFtNjk0cDNrcXZzYjI3ZjNyNiJ9.JczgAMs4tnWXbW8cbVKpaA"</string>
 </resources>

@@ -34,6 +34,11 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(bottom_app_bar)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.bottomappbar_menu, menu)
+        return true
     }
     override fun onStart() {
         super.onStart()

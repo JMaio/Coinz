@@ -14,6 +14,61 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         mapbox:mapbox_styleUrl="mapbox://styles/jmaio/cjmi1329anoq22sqt6z3fkw2m" />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="96dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.chip.ChipGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/button_shil"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:checked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipBackgroundColor="@color/shil_button"
+                android:textColor="@color/textLight"
+                android:text="@string/curr_shil" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/button_dolr"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:checked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipBackgroundColor="@color/dolr_button"
+                android:textColor="@color/textLight"
+                android:text="@string/curr_dolr" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/button_quid"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:checked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipBackgroundColor="@color/quid_button"
+                android:textColor="@color/textLight"
+                android:text="@string/curr_quid" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/button_peny"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:checked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipBackgroundColor="@color/peny_button"
+                android:textColor="@color/textLight"
+                android:text="@string/curr_peny" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </RelativeLayout>
 
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

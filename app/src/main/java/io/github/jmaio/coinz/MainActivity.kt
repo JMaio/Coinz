@@ -22,9 +22,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
         Mapbox.getInstance(applicationContext, getString(R.string.app_access_token))
-        setContentView(R.layout.activity_main)
 
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)

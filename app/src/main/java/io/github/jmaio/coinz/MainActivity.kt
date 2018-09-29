@@ -58,6 +58,14 @@ class MainActivity : AppCompatActivity() {
         inflater.inflate(R.menu.bottomappbar_menu, menu)
         return true
     }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item!!.itemId) {
+            R.id.app_bar_settings -> toast("Settings item is clicked!")
+            android.R.id.home -> toast("you pressed the bank button!")
+        }
+        return true
+    }
     override fun onStart() {
         super.onStart()
         map_view.onStart()

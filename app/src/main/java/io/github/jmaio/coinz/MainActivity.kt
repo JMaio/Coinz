@@ -27,12 +27,12 @@ class MainActivity : AppCompatActivity() {
 
         Mapbox.getInstance(applicationContext, getString(R.string.app_access_token))
 
-        mapView = findViewById(R.id.mapView)
-        mapView.onCreate(savedInstanceState)
+        map_view.onCreate(savedInstanceState)
         setSupportActionBar(bottom_app_bar)
 
-        mapView.getMapAsync {
-        it.setStyle(Style.MAPBOX_STREETS)
+        map_view.getMapAsync {
+            it.setStyle(Style.MAPBOX_STREETS)
+        }
         fab.setOnClickListener {
             toast("you pressed the fab!")
         }

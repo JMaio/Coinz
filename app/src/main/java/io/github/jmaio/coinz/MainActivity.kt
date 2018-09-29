@@ -12,10 +12,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
+    fun toast(text: String) {
+        Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
 
-    private fun toast(text : String) {
-        val toast = Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT)
-        toast.show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

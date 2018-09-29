@@ -42,6 +42,12 @@ class MainActivity : AppCompatActivity() {
         val Peny = Coin(applicationContext, "PENY", button_peny)
 
         val coins = listOf(Shil, Dolr, Quid, Peny)
+
+        for (coin in coins) {
+            coin.chip.setOnCheckedChangeListener { buttonView, isChecked ->
+                snackbar("${buttonView.id} was pressed, now $isChecked")
+//                toast("$buttonView was pressed, now $isChecked")
+            }
         }
 
         setSupportActionBar(bottom_app_bar)

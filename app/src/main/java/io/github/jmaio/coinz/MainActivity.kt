@@ -14,7 +14,10 @@ class MainActivity : AppCompatActivity() {
 
     fun toast(text: String) {
         Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+    }
 
+    fun snackbar(text: String) {
+        Snackbar.make(bottom_bar_group, text, Snackbar.LENGTH_SHORT).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

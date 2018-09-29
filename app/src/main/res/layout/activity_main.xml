@@ -1,84 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <com.mapbox.mapboxsdk.maps.MapView
-        android:id="@+id/mapView"
+        android:id="@+id/map_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         mapbox:mapbox_styleUrl="mapbox://styles/jmaio/cjmi1329anoq22sqt6z3fkw2m">
 
     </com.mapbox.mapboxsdk.maps.MapView>
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="96dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/overlay_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?actionBarSize">
 
         <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_visibility"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:chipSpacing="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.95"
+            app:singleLine="true">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/button_shil"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:checked="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:chipBackgroundColor="@color/shil_button"
+                android:checked="true"
+                android:text="@string/curr_shil"
                 android:textColor="@color/textLight"
-                android:text="@string/curr_shil" />
+                app:chipBackgroundColor="@color/shil_button" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/button_dolr"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:checked="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:chipBackgroundColor="@color/dolr_button"
+                android:checked="true"
+                android:text="@string/curr_dolr"
                 android:textColor="@color/textLight"
-                android:text="@string/curr_dolr" />
+                app:chipBackgroundColor="@color/dolr_button" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/button_quid"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:checked="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:chipBackgroundColor="@color/quid_button"
+                android:checked="true"
+                android:text="@string/curr_quid"
                 android:textColor="@color/textLight"
-                android:text="@string/curr_quid" />
+                app:chipBackgroundColor="@color/quid_button" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/button_peny"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:checked="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:chipBackgroundColor="@color/peny_button"
+                android:checked="true"
+                android:text="@string/curr_peny"
                 android:textColor="@color/textLight"
-                android:text="@string/curr_peny" />
+                app:chipBackgroundColor="@color/peny_button" />
 
         </com.google.android.material.chip.ChipGroup>
-
-    </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/bottom_bar_group"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
+            android:elevation="6dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_account_balance_wallet_white_24dp"
@@ -86,14 +98,15 @@
 
         <com.google.android.material.bottomappbar.BottomAppBar
             android:id="@+id/bottom_app_bar"
+            android:elevation="6dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            mapbox:backgroundTint="@color/colorPrimary"
-            mapbox:fabAlignmentMode="center"
-            mapbox:menu="@menu/bottomappbar_menu"
-            mapbox:navigationIcon="@drawable/ic_account_balance_white_24dp" />
+            android:backgroundTint="@color/colorPrimary"
+            app:fabAlignmentMode="center"
+            app:menu="@menu/bottomappbar_menu"
+            app:navigationIcon="@drawable/ic_account_balance_white_24dp" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

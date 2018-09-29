@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
 
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
+        setSupportActionBar(bottom_app_bar)
 
         mapView.getMapAsync {
         it.setStyle(Style.MAPBOX_STREETS)

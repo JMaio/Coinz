@@ -12,7 +12,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var mapView : MapView
 
     private fun toast(text : String) {
         val toast = Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT)
@@ -42,37 +41,37 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        map_view.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        map_view.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        mapView.onPause()
+        map_view.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        mapView.onStop()
+        map_view.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        mapView.onSaveInstanceState(outState)
+        map_view.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mapView.onLowMemory()
+        map_view.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
+        map_view.onDestroy()
     }
 
 }

@@ -31,6 +31,9 @@ class MainActivity : AppCompatActivity() {
 
         mapView.getMapAsync {
         it.setStyle(Style.MAPBOX_STREETS)
+        fab.setOnClickListener {
+            toast("you pressed the fab!")
+        }
         }
 
         setSupportActionBar(bottom_app_bar)

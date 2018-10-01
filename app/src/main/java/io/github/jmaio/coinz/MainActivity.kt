@@ -24,11 +24,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(bottom_app_bar)
 
         Mapbox.getInstance(applicationContext, getString(R.string.app_access_token))
 
         map_view.onCreate(savedInstanceState)
-        setSupportActionBar(bottom_app_bar)
 
         map_view.getMapAsync {
             it.setStyle(Style.MAPBOX_STREETS)
@@ -50,8 +50,6 @@ class MainActivity : AppCompatActivity() {
 //                toast("$buttonView was pressed, now $isChecked")
             }
         }
-
-        setSupportActionBar(bottom_app_bar)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -5,7 +5,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import io.github.jmaio.coinz.R.color as CoinzColor
 
-class Coin(context : Context, name : String, val chip: Chip) {
+class Coin(name : String, val chip: Chip) {
     var visible = true
 
     val color = when(name) {

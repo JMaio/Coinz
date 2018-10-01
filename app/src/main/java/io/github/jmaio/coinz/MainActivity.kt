@@ -37,10 +37,10 @@ class MainActivity : AppCompatActivity() {
             toast("you pressed the fab!")
         }
 
-        val Shil = Coin(applicationContext, "SHIL", button_shil)
-        val Dolr = Coin(applicationContext, "DOLR", button_dolr)
-        val Quid = Coin(applicationContext, "QUID", button_quid)
-        val Peny = Coin(applicationContext, "PENY", button_peny)
+        val Shil = Coin(R.string.curr_shil.toString(), button_shil)
+        val Dolr = Coin(R.string.curr_dolr.toString(), button_dolr)
+        val Quid = Coin(R.string.curr_quid.toString(), button_quid)
+        val Peny = Coin(R.string.curr_peny.toString(), button_peny)
 
         val coins = listOf(Shil, Dolr, Quid, Peny)
 

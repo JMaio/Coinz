@@ -9,10 +9,10 @@ class Coin(name : String, val chip: Chip) {
     var visible = true
 
     val color = when(name) {
-        "SHIL" -> CoinzColor.colorShil
-        "DOLR" -> CoinzColor.colorDolr
-        "QUID" -> CoinzColor.colorQuid
-        "PENY" -> CoinzColor.colorPeny
+        R.string.curr_shil.toString() -> CoinzColor.colorShil
+        R.string.curr_dolr.toString() -> CoinzColor.colorDolr
+        R.string.curr_quid.toString() -> CoinzColor.colorQuid
+        R.string.curr_peny.toString() -> CoinzColor.colorPeny
         else -> CoinzColor.colorDisabled
     }
 

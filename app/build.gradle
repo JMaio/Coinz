@@ -46,4 +46,6 @@ dependencies {
     // mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.5.0'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.8.2'
+    // anko
+    implementation 'org.jetbrains.anko:anko-commons:0.10.4'
 }

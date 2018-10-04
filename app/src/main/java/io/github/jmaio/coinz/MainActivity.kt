@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     fun toast(text: String) {
         Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
     }
+    private lateinit var mapView: MapView
 
     fun snackbar(text: String) {
         Snackbar.make(bottom_bar_group, text, Snackbar.LENGTH_SHORT).show()
@@ -27,11 +28,10 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(bottom_app_bar)
 
         Mapbox.getInstance(applicationContext, getString(R.string.app_access_token))
-
-        map_view.onCreate(savedInstanceState)
-
-        map_view.getMapAsync {
-            it.setStyle(Style.MAPBOX_STREETS)
+        mapView = findViewById(R.id.map_view)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync { mapboxMap ->
+            map = mapboxMap
         }
         fab.setOnClickListener {
             toast("you pressed the fab!")
@@ -67,37 +67,37 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onStart() {
         super.onStart()
-        map_view.onStart()
+        mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
-        map_view.onResume()
+        mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        map_view.onPause()
+        mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
-        map_view.onStop()
+        mapView.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        map_view.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        map_view.onLowMemory()
+        mapView.onLowMemory()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        map_view.onDestroy()
+        mapView.onDestroy()
     }
 
 }

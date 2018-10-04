@@ -17,6 +17,12 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
     }
     private lateinit var mapView: MapView
+    private lateinit var map: MapboxMap
+    private lateinit var permissionsManager: PermissionsManager
+    private lateinit var originLocation: Location
+
+    private var locationEngine: LocationEngine? = null
+    private var locationLayerPlugin: LocationLayerPlugin? = null
 
     fun snackbar(text: String) {
         Snackbar.make(bottom_bar_group, text, Snackbar.LENGTH_SHORT).show()
@@ -24,6 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
         setSupportActionBar(bottom_app_bar)
 
@@ -32,7 +39,9 @@ class MainActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { mapboxMap ->
             map = mapboxMap
+            enableLocation()
         }
+
         fab.setOnClickListener {
             toast("you pressed the fab!")
         }
@@ -48,10 +57,82 @@ class MainActivity : AppCompatActivity() {
             coin.chip.setOnCheckedChangeListener { buttonView, isChecked ->
                 snackbar("${buttonView.id} was pressed, now $isChecked")
 //                toast("$buttonView was pressed, now $isChecked")
+//    // when map is ready, set map panning bounds
+    override fun onMapReady(mapboxMap: MapboxMap) {
+    }
+    private fun enableLocation() {
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            initializeLocationEngine()
+            initializeLocationLayer()
+        } else {
+            permissionsManager = PermissionsManager(this)
+            permissionsManager.requestLocationPermissions(this)
+        }
+    }
+
+    @SuppressWarnings("MissingPermission")
+    private fun initializeLocationEngine() {
+        locationEngine = LocationEngineProvider(this).obtainBestLocationEngineAvailable()
+        locationEngine?.priority = LocationEnginePriority.HIGH_ACCURACY
+        locationEngine?.addLocationEngineListener(this)
+        locationEngine?.activate()
+
+        val lastLocation = locationEngine?.lastLocation
+
+        if (lastLocation != null) {
+            originLocation = lastLocation
+            setCameraPosition(lastLocation)
+        }
+    }
+
+    @SuppressWarnings("MissingPermission")
+    private fun initializeLocationLayer() {
+        locationLayerPlugin = LocationLayerPlugin(mapView, map, locationEngine)
+        locationLayerPlugin?.isLocationLayerEnabled = true
+        locationLayerPlugin?.cameraMode = CameraMode.TRACKING
+        locationLayerPlugin?.renderMode = RenderMode.NORMAL
+    }
+
+    private fun setCameraPosition(location: Location) {
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                LatLng(location.latitude, location.longitude), 13.0))
+    }
+
+    // mapbox / permissions
+    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
+        // toast or dialog to explain access
+        if (permissionsToExplain != null) {
+            for (permission in permissionsToExplain) {
+                toast(permission)
             }
         }
     }
 
+    override fun onPermissionResult(granted: Boolean) {
+        if (granted) {
+            enableLocation()
+        } else {
+            onExplanationNeeded(mutableListOf(getString(R.string.location_explanation)))
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onLocationChanged(location: Location?) {
+        location?.let {
+            originLocation = location
+            setCameraPosition(location)
+        }
+    }
+
+    @SuppressWarnings("MissingPermission")
+    override fun onConnected() {
+        locationEngine?.requestLocationUpdates()
+    }
+
+    // after mapbox
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.bottomappbar_menu, menu)
@@ -65,8 +146,14 @@ class MainActivity : AppCompatActivity() {
         }
         return true
     }
+
+    @SuppressWarnings("MissingPermission")
     override fun onStart() {
         super.onStart()
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            locationEngine?.requestLocationUpdates()
+            locationLayerPlugin?.onStart()
+        }
         mapView.onStart()
     }
 
@@ -82,6 +169,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        locationEngine?.removeLocationUpdates()
+        locationLayerPlugin?.onStop()
         mapView.onStop()
     }
 
@@ -98,6 +187,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mapView.onDestroy()
+        locationEngine?.deactivate()
     }
 
 }

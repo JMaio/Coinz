@@ -26,8 +26,8 @@ import org.jetbrains.anko.toast
 import java.util.*
 
 
+class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineListener, OnMapReadyCallback {
 
-class MainActivity : AppCompatActivity() {
 
     fun toast(text: String) {
         Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()

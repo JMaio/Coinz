@@ -29,9 +29,9 @@ import java.util.*
 class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineListener, OnMapReadyCallback {
 
 
-    fun toast(text: String) {
-        Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
-    }
+
+class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineListener, OnMapReadyCallback {
+
     private lateinit var mapView: MapView
     private lateinit var map: MapboxMap
     private lateinit var permissionsManager: PermissionsManager
@@ -40,9 +40,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
     private var locationEngine: LocationEngine? = null
     private var locationLayerPlugin: LocationLayerPlugin? = null
 
-    fun snackbar(text: String) {
-        Snackbar.make(bottom_bar_group, text, Snackbar.LENGTH_SHORT).show()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

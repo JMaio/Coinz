@@ -40,6 +40,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
     private var locationEngine: LocationEngine? = null
     private var locationLayerPlugin: LocationLayerPlugin? = null
 
+    private val CENTRAL_BOUNDS = LatLngBounds.Builder()
+            .include(LatLng(-3.192473, 55.946233))
+            .include(LatLng(-3.184319, 55.942617))
+            .build()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

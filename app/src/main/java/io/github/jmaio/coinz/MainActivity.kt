@@ -28,10 +28,6 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineListener, OnMapReadyCallback {
 
-
-
-class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineListener, OnMapReadyCallback {
-
     private lateinit var mapView: MapView
     private lateinit var map: MapboxMap
     private lateinit var permissionsManager: PermissionsManager
@@ -76,10 +72,16 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
                 toast("${buttonView.id} was pressed, now $isChecked")
             }
         }
+
+        val coinMap = CoinMap()
+        coinMap.getCoinsMap(Calendar.getInstance())
     }
+
 //    // when map is ready, set map panning bounds
     override fun onMapReady(mapboxMap: MapboxMap) {
+
     }
+
     private fun enableLocation() {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             initializeLocationEngine()

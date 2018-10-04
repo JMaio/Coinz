@@ -73,8 +73,10 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
 
         for (coin in coins) {
             coin.chip.setOnCheckedChangeListener { buttonView, isChecked ->
-                snackbar("${buttonView.id} was pressed, now $isChecked")
-//                toast("$buttonView was pressed, now $isChecked")
+                toast("${buttonView.id} was pressed, now $isChecked")
+            }
+        }
+    }
 //    // when map is ready, set map panning bounds
     override fun onMapReady(mapboxMap: MapboxMap) {
     }

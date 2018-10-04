@@ -7,4 +7,5 @@
     <string name="curr_dolr">DOLR</string>
     <string name="curr_quid">QUID</string>
     <string name="curr_peny">PENY</string>
+    <string name="location_explanation">Location access is required to enable gameplay! Please enable in app options</string>
 </resources>

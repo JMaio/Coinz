@@ -58,7 +58,9 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
             map = mapboxMap
             enableLocation()
         }
+        createOnClickListeners()
 
+    private fun createOnClickListeners() {
         fab.setOnClickListener {
             toast("you pressed the fab!")
         }

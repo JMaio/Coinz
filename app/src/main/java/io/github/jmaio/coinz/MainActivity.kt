@@ -58,10 +58,14 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
             map = mapboxMap
             enableLocation()
         }
+        info("[onStart] Mapbox object setup")
+
         createOnClickListeners()
+        info("[onStart] created button press listeners")
 
         val coinMap = CoinMap()
         coinMap.getCoinsMap(Calendar.getInstance())
+    }
 
     private fun createOnClickListeners() {
         fab.setOnClickListener {

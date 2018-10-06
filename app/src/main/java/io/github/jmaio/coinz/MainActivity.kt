@@ -60,6 +60,9 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
         }
         createOnClickListeners()
 
+        val coinMap = CoinMap()
+        coinMap.getCoinsMap(Calendar.getInstance())
+
     private fun createOnClickListeners() {
         fab.setOnClickListener {
             toast("you pressed the fab!")
@@ -70,9 +73,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
         val quidBtn = CoinButton(applicationContext, getString(R.string.curr_quid), button_quid)
         val penyBtn = CoinButton(applicationContext, getString(R.string.curr_peny), button_peny)
 
-
-        val coinMap = CoinMap()
-        coinMap.getCoinsMap(Calendar.getInstance())
     }
 
 //    // when map is ready, set map panning bounds

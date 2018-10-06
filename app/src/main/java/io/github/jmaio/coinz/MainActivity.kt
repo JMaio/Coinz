@@ -63,18 +63,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
             toast("you pressed the fab!")
         }
 
-        val Shil = Coin(R.string.curr_shil.toString(), button_shil)
-        val Dolr = Coin(R.string.curr_dolr.toString(), button_dolr)
-        val Quid = Coin(R.string.curr_quid.toString(), button_quid)
-        val Peny = Coin(R.string.curr_peny.toString(), button_peny)
+        val shilBtn = CoinButton(applicationContext, getString(R.string.curr_shil), button_shil)
+        val dolrBtn = CoinButton(applicationContext, getString(R.string.curr_dolr), button_dolr)
+        val quidBtn = CoinButton(applicationContext, getString(R.string.curr_quid), button_quid)
+        val penyBtn = CoinButton(applicationContext, getString(R.string.curr_peny), button_peny)
 
-        val coins = listOf(Shil, Dolr, Quid, Peny)
-
-        for (coin in coins) {
-            coin.chip.setOnCheckedChangeListener { buttonView, isChecked ->
-                toast("${buttonView.id} was pressed, now $isChecked")
-            }
-        }
 
         val coinMap = CoinMap()
         coinMap.getCoinsMap(Calendar.getInstance())

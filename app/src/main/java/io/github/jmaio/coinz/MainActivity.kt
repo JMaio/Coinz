@@ -22,11 +22,14 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.util.*
 
 
-class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineListener, OnMapReadyCallback {
+class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineListener,
+        OnMapReadyCallback, AnkoLogger {
 
     private lateinit var mapView: MapView
     private lateinit var map: MapboxMap

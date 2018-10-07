@@ -43,9 +43,11 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.0-beta-01'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-beta01'
 
+    // location services
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
     // mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.5.0'
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.8.2'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.5.2'
     // anko
     implementation 'org.jetbrains.anko:anko-commons:0.10.4'
 }

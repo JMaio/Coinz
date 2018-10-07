@@ -1,6 +1,7 @@
 package io.github.jmaio.coinz
 
 class Wallet {
+    val id = null
     // store a user's gold as Double
     var gold: Double = 0.0
 
@@ -15,7 +16,7 @@ class Wallet {
     }
 
     // transfer a coin to another player
-    fun donateCoin(coin: Coin, player: Player) {
+    fun donateCoin(coin: Coin, wallet: Wallet) {
 
     }
 

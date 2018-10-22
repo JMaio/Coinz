@@ -67,11 +67,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // setup mapbox
-        Mapbox.getInstance(applicationContext, getString(R.string.app_access_token))
-
         setContentView(R.layout.activity_main)
         setSupportActionBar(bottom_app_bar)
+
+        // setup mapbox
+        Mapbox.getInstance(applicationContext, getString(R.string.mapbox_access_token))
 
         mapView = findViewById(R.id.map_view)
 

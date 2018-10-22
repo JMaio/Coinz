@@ -41,7 +41,10 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStream
+import java.io.PrintWriter
 import java.nio.charset.Charset
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -63,6 +66,15 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
             .include(LatLng(-3.184319, 55.942617))
             .build()
 
+    private val MARKER_SOURCE = "markers-source"
+    private val MARKER_STYLE_LAYER = "markers-style-layer"
+    private val MARKER_IMAGE = "custom-marker"
+
+    private var downloadDate = "" // Format: YYYY/MM/DD
+    private val DEBUG_MODE = true
+
+    private lateinit var coinMap: CoinMap
+    private lateinit var coinzmapFile: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,10 +94,92 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
         createOnClickListeners()
         info("[onCreate] created button press listeners")
 
+        coinzmapFile = "${act.filesDir.absolutePath}/${getString(R.string.coinmap_filename)}"
     }
 
-        val coinMap = CoinMap()
-        coinMap.getCoinsMap(Calendar.getInstance())
+    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+    @SuppressWarnings("MissingPermission")
+    override fun onStart() {
+        super.onStart()
+
+        mapView?.onStart()
+
+        val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
+        // use ”” as the default value (this might be the first time the app is run)
+        downloadDate = settings.getString("lastDownloadDate", "")
+        info("[onStart] last map load date = '$downloadDate'")
+
+        doAsync {
+            fetchCoinMap()
+        }
+//        coinMap = CoinMap().apply { loadMapFromFile(coinzmapFile) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView?.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView?.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        locationEngine.removeLocationUpdates()
+
+        mapView?.onStop()
+
+        val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
+        info("[onStop] setting last download date --> '$downloadDate'")
+        val editor = settings.edit()
+        editor.putString("lastDownloadDate", downloadDate)
+        editor.apply()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView?.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView?.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView?.onDestroy()
+        locationEngine.deactivate()
+    }
+
+    private fun fetchCoinMap() {
+        // TODO download today's file and set the date
+        val today = LocalDateTime.now()
+        val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
+
+        // if map is already today's map
+        if (dateString == downloadDate && !DEBUG_MODE) {
+            info("[fetchCoinMap]: dateString = $dateString = downloadDate - halting...")
+            // return if downloadDate
+            return
+        }
+
+        // make url from date pattern
+        info("[fetchCoinMap]: dateString = $dateString")
+        val url = "${getString(R.string.map_repo)}/$dateString/${getString(R.string.coinmap_filename)}"
+        info("[fetchCoinMap]: url = $url")
+
+
+        val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
+        coinMapDownloader.execute()
+        coinMapDownloader.saveAsFile()
+        coinMap = CoinMap().apply { loadMapFromFile(coinzmapFile) }
+
+        downloadDate = dateString
+
     }
 
     private fun createOnClickListeners() {
@@ -107,9 +201,38 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
         } else {
             debug("[onMapReady] mapboxMap found")
             map = mapboxMap
+
+            val icon: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.custom_marker)
+            map?.addImage(MARKER_IMAGE, icon)
+            addMarkers()
+
             enableLocation()
         }
     }
+
+    private fun addMarkers() {
+        var features: List<Feature> = ArrayList()
+        /* Source: A data source specifies the geographic coordinate where the image marker gets placed. */
+        features += Feature.fromGeometry(
+                Point.fromLngLat(-3.187581578038589, 55.94421549261915))
+
+//        doAsync {
+//            val json = File(act.filesDir.absolutePath).readText(Charsets.UTF_8)
+//            val features = json.getJSONArray("features")
+//            val coinzMap: GeoJson = ;
+//        }
+
+        val featureCollection = FeatureCollection.fromFeatures(coinMap.points)
+//        val featureCollection = FeatureCollection.fromFeatures(features)
+        val source = GeoJsonSource(MARKER_SOURCE, featureCollection)
+        map?.addSource(source)
+
+        val markerStyleLayer = SymbolLayer(MARKER_STYLE_LAYER, MARKER_SOURCE)
+                .withProperties(
+                        PropertyFactory.iconAllowOverlap(true),
+                        PropertyFactory.iconImage(MARKER_IMAGE)
+                )
+        map?.addLayer(markerStyleLayer)
 
     }
 
@@ -153,7 +276,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
             else {
                 locationLayerPlugin = LocationLayerPlugin(mapView!!, map!!, locationEngine)
                 locationLayerPlugin.apply {
-                    setLocationLayerEnabled(true)
+                    isLocationLayerEnabled = true // setLocationLayerEnabled(true)
                     cameraMode = CameraMode.TRACKING
                     renderMode = RenderMode.NORMAL
                 }
@@ -200,10 +323,10 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
         }
     }
 
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
-
 
     // after mapbox
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -218,48 +341,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
             android.R.id.home -> toast("you pressed the bank button!")
         }
         return true
-    }
-
-    @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-    @SuppressWarnings("MissingPermission")
-    override fun onStart() {
-        super.onStart()
-
-        mapView?.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mapView?.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mapView?.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-        locationEngine.removeLocationUpdates()
-
-        mapView?.onStop()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        mapView?.onSaveInstanceState(outState)
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        mapView?.onLowMemory()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapView?.onDestroy()
-        locationEngine.deactivate()
     }
 
 }

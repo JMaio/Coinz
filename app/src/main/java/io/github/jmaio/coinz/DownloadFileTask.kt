@@ -10,7 +10,6 @@ import org.jetbrains.anko.act
 import org.jetbrains.anko.info
 import kotlin.math.min
 
-
 // implementation of DownloadFileTask from lecture 5
 interface DownloadCompleteListener {
     fun downloadComplete(result: String)
@@ -25,17 +24,11 @@ object DownloadCompleteRunner: DownloadCompleteListener, AnkoLogger {
     }
 }
 
-
 class DownloadFileTask(private val caller: DownloadCompleteListener):
         AsyncTask<String, Void, String>(), AnkoLogger {
 
-    lateinit var dir: String
-    lateinit var filename: String
-
     override fun doInBackground(vararg args: String): String = try {
         info("[downloadUrl] executing in background")
-        dir = args[1]
-        filename = args[2]
         loadFileFromNetwork(args[0])
     } catch (e: IOException) {
         "Unable to load content. Check your network connection"
@@ -57,20 +50,14 @@ class DownloadFileTask(private val caller: DownloadCompleteListener):
         conn.requestMethod = "GET"
         conn.doInput = true
         conn.connect()
+//        val stream = conn.inputStream
         info("[downloadUrl] connection executed, response=${conn.responseCode}")
         return conn.inputStream
-    }
-
-    private fun saveStringAs(result: String, dir: String, name: String) {
-        info("[dir]: $dir/$name")
-        val file = PrintWriter("$dir/$name")
-        file.println(result)
     }
 
     override fun onPostExecute(result: String) {
         super.onPostExecute(result)
         caller.downloadComplete(result)
-        saveStringAs(result, dir, filename)
     }
 
 }

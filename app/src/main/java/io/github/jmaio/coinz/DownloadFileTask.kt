@@ -31,14 +31,16 @@ class DownloadFileTask(val url: String, val filename: String) : AnkoLogger {
     var result: String? = null
 
     fun execute() {
-//        doAsync {
-            result = try {
-                info("[downloadUrl] executing in background")
-                loadFileFromNetwork(url)
-            } catch (e: IOException) {
-                null
-            }
-//        }
+        if (doAsync {
+                    result = try {
+                        info("[downloadUrl] executing in background")
+                        loadFileFromNetwork(url)
+                    } catch (e: IOException) {
+                        null
+                    }
+                }.isDone) {
+            saveAsFile()
+        }
 
     }
 
@@ -63,7 +65,7 @@ class DownloadFileTask(val url: String, val filename: String) : AnkoLogger {
         return conn.inputStream
     }
 
-    fun saveAsFile() : Boolean {
+    fun saveAsFile(): Boolean {
         info("[saveStringAsFile]: $filename")
         if (result == null) {
             info("[saveStringAsFile]: failed! result = null")

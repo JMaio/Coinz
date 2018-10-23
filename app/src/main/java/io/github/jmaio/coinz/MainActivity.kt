@@ -21,8 +21,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineListener,
-        OnMapReadyCallback, AnkoLogger {
+class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     private var mapView: MapView? = null
     private var map: MapboxMap? = null

@@ -1,55 +1,24 @@
 package io.github.jmaio.coinz
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.AssetManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.location.Location
-import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineListener
-import com.mapbox.android.core.location.LocationEnginePriority
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.GeoJson
-import com.mapbox.geojson.Geometry
-import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode
-import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.mapboxsdk.style.sources.Source
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
-import org.json.JSONArray
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStream
-import java.io.PrintWriter
-import java.net.URL
-import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineListener,

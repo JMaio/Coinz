@@ -53,8 +53,8 @@ class WildCoin(
         @SerializedName("properties") val properties: Properties,
         @SerializedName("geometry") val geometry: Geometry
 ) {
-    val lat = geometry.coordinates[0]
-    val lng = geometry.coordinates[1]
+    val lng = geometry.coordinates[0]
+    val lat = geometry.coordinates[1]
     fun asFeature(): Feature {
         return Feature.fromGeometry(Point.fromLngLat(lat, lng))
     }

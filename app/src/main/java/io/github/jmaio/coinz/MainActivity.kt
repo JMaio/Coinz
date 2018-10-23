@@ -19,6 +19,7 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.GeoJson
+import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
@@ -34,6 +35,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.style.sources.Source
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import org.json.JSONArray
@@ -42,6 +44,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStream
 import java.io.PrintWriter
+import java.net.URL
 import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -109,9 +112,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
         downloadDate = settings.getString("lastDownloadDate", "")
         info("[onStart] last map load date = '$downloadDate'")
 
-        doAsync {
-            fetchCoinMap()
-        }
+        fetchCoinMap()
 //        coinMap = CoinMap().apply { loadMapFromFile(coinzmapFile) }
     }
 
@@ -175,7 +176,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
 
         val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
         coinMapDownloader.execute()
-        coinMapDownloader.saveAsFile()
         coinMap = CoinMap().apply { loadMapFromFile(coinzmapFile) }
 
         downloadDate = dateString
@@ -204,28 +204,27 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
 
             val icon: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.custom_marker)
             map?.addImage(MARKER_IMAGE, icon)
-            addMarkers()
-
             enableLocation()
+            addMarkers()
         }
     }
 
     private fun addMarkers() {
         var features: List<Feature> = ArrayList()
-        /* Source: A data source specifies the geographic coordinate where the image marker gets placed. */
-        features += Feature.fromGeometry(
-                Point.fromLngLat(-3.187581578038589, 55.94421549261915))
 
-//        doAsync {
-//            val json = File(act.filesDir.absolutePath).readText(Charsets.UTF_8)
-//            val features = json.getJSONArray("features")
-//            val coinzMap: GeoJson = ;
-//        }
+        for (wildCoin in coinMap.coins) {
+//                features += wildCoin.asFeature()
+            map?.addMarker(MarkerOptions()
+                    .position(wildCoin.asLatLng())
+                    .title(wildCoin.properties.markerSymbol.toString()))
 
-        val featureCollection = FeatureCollection.fromFeatures(coinMap.points)
-//        val featureCollection = FeatureCollection.fromFeatures(features)
-        val source = GeoJsonSource(MARKER_SOURCE, featureCollection)
-        map?.addSource(source)
+        }
+        info("[mapbox] added eiffel tower ---")
+        map?.addMarker(MarkerOptions()
+                .position(LatLng(48.85819, 2.29458))
+                .title("Eiffel Tower"))
+//        map?.addSource(source)
+
 
         val markerStyleLayer = SymbolLayer(MARKER_STYLE_LAYER, MARKER_SOURCE)
                 .withProperties(
@@ -270,10 +269,12 @@ class MainActivity : AppCompatActivity(), PermissionsListener, LocationEngineLis
 
     @SuppressWarnings("MissingPermission")
     private fun initializeLocationLayer() {
-        if (mapView == null) { debug("mapView is null") }
-        else {
-            if (map == null) { debug("map is null") }
-            else {
+        if (mapView == null) {
+            debug("mapView is null")
+        } else {
+            if (map == null) {
+                debug("map is null")
+            } else {
                 locationLayerPlugin = LocationLayerPlugin(mapView!!, map!!, locationEngine)
                 locationLayerPlugin.apply {
                     isLocationLayerEnabled = true // setLocationLayerEnabled(true)

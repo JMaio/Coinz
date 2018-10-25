@@ -8,7 +8,7 @@
     <string name="curr_dolr">DOLR</string>
     <string name="curr_quid">QUID</string>
     <string name="curr_peny">PENY</string>
-    <string name="location_explanation">Location access is required to enable gameplay! Please enable in app options</string>
+    <string name="location_explanation">Location permissions are essential to play Coinz. Please enable location to proceed.</string>
     <string name="map_repo">http://homepages.inf.ed.ac.uk/stg/coinz</string>
     <string name="coinmap_filename">coinzmap.geojson</string>
 </resources>

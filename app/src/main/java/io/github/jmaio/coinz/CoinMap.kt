@@ -1,27 +1,18 @@
 package io.github.jmaio.coinz
 
-import android.util.JsonReader
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.mapbox.geojson.Feature
-import org.json.JSONObject
-import java.io.File
-import java.lang.reflect.Array.getDouble
-import com.mapbox.mapboxsdk.geometry.LatLng
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.info
-import org.json.JSONArray
-import java.text.SimpleDateFormat
-import java.util.*
-import org.json.JSONException
 import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
-import com.mapbox.geojson.GeoJson
+import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.geometry.LatLng
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+import org.json.JSONException
+import java.io.File
 import java.io.FileNotFoundException
-import java.io.FileReader
 import java.io.IOException
+import java.util.*
 import kotlin.collections.ArrayList
 
 data class Rates(
@@ -38,11 +29,6 @@ data class Properties(
         @SerializedName("marker-symbol") val markerSymbol: Int,
         @SerializedName("marker-color") val markerColor: String
 )
-
-//data class Coordinates(
-//        val lat: Double,
-//        val lng: Double
-//)
 
 data class Geometry(
         @SerializedName("type") val type: String,
@@ -84,29 +70,32 @@ class CoinMap : AnkoLogger {
 
             info("[loadMapFromFile] : GeoJSON parse OK -- $j")
 
-            rates = Gson().fromJson(j.get("rates"), Rates::class.java)
+            rates = gson.fromJson(j.get("rates"), Rates::class.java)
             val features = j.get("features").asJsonArray
 
             for (i in 0 until features.size()) {
                 val f = features.get(i).asJsonObject
-                val props = Gson().fromJson(f.get("properties").asJsonObject, Properties::class.java)
-                val geometry = Gson().fromJson(f.get("geometry").asJsonObject, Geometry::class.java)
+                val props = gson.fromJson(f.get("properties").asJsonObject, Properties::class.java)
+                val geometry = gson.fromJson(f.get("geometry").asJsonObject, Geometry::class.java)
 
                 coins += WildCoin(props, geometry)
             }
 
             info("[loadMapFromFile] : coins : $coins")
-
-        } catch (e: IOException) {
-            e.printStackTrace()
         } catch (e: FileNotFoundException) {
             info("[loadMapFromFile]: file not found!")
+            e.printStackTrace()
+        } catch (e: IOException) {
             e.printStackTrace()
         } catch (e: JSONException) {
             e.printStackTrace()
         } finally {
 
         }
+    }
+
+    fun isEmpty(): Boolean {
+        return coins.isEmpty()
     }
 
 }

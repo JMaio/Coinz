@@ -24,63 +24,68 @@
         android:layout_height="match_parent"
         android:layout_marginBottom="?actionBarSize">
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_visibility"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            app:chipSpacing="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.95"
-            app:singleLine="true">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/button_shil"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group_visibility"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/curr_shil"
-                android:textColor="@color/textLight"
-                app:chipBackgroundColor="@color/shil_button" />
+                android:layout_height="48dp"
+                android:layout_gravity="center|bottom"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginBottom="24dp"
+                app:chipSpacing="12dp"
+                app:singleLine="true">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/button_dolr"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/curr_dolr"
-                android:textColor="@color/textLight"
-                app:chipBackgroundColor="@color/dolr_button" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/button_shil"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:elevation="2dp"
+                    android:text="@string/curr_shil"
+                    android:textAlignment="center"
+                    android:textColor="@color/textLight"
+                    app:chipBackgroundColor="@color/shil_button" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/button_quid"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/curr_quid"
-                android:textColor="@color/textLight"
-                app:chipBackgroundColor="@color/quid_button" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/button_dolr"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:elevation="2dp"
+                    android:text="@string/curr_dolr"
+                    android:textAlignment="center"
+                    android:textColor="@color/textLight"
+                    app:chipBackgroundColor="@color/dolr_button" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/button_peny"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/curr_peny"
-                android:textColor="@color/textLight"
-                app:chipBackgroundColor="@color/peny_button" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/button_quid"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:elevation="2dp"
+                    android:text="@string/curr_quid"
+                    android:textAlignment="center"
+                    android:textColor="@color/textLight"
+                    app:chipBackgroundColor="@color/quid_button" />
 
-        </com.google.android.material.chip.ChipGroup>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/button_peny"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:elevation="2dp"
+                    android:text="@string/curr_peny"
+                    android:textAlignment="center"
+                    android:textColor="@color/textLight"
+                    app:chipBackgroundColor="@color/peny_button" />
+
+            </com.google.android.material.chip.ChipGroup>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

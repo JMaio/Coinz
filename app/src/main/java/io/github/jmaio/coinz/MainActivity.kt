@@ -1,11 +1,12 @@
 package io.github.jmaio.coinz
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
@@ -20,17 +21,12 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-
 class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
 
-    private lateinit var originLocation: Location
-
     private lateinit var permissionsManager: PermissionsManager
-    private lateinit var locationEngine: LocationEngine
-    private lateinit var locationLayerPlugin: LocationLayerPlugin
 
     private val CENTRAL_BOUNDS = LatLngBounds.Builder()
             .include(LatLng(-3.192473, 55.946233))
@@ -42,30 +38,39 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     private val MARKER_IMAGE = "custom-marker"
 
     private var downloadDate = "" // Format: YYYY/MM/DD
-    private val DEBUG_MODE = true
+    private val DEBUG_MODE = false
 
-    private lateinit var coinMap: CoinMap
+    private var coinMap: CoinMap = CoinMap()
     private lateinit var coinzmapFile: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        info("[onCreate] -- coinMap empty? ${coinMap.isEmpty()}")
+
+        // Mapbox access token is configured here. This needs to be called either in your application
+        // object or in the same activity which contains the mapview.
+        Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
+
+        // This contains the MapView in XML and needs to be called after the access token is configured.
         setContentView(R.layout.activity_main)
         setSupportActionBar(bottom_app_bar)
 
-        // setup mapbox
-        Mapbox.getInstance(applicationContext, getString(R.string.mapbox_access_token))
+        coinzmapFile = "${this.filesDir.absolutePath}/${getString(R.string.coinmap_filename)}"
 
         mapView = findViewById(R.id.map_view)
-
         mapView?.onCreate(savedInstanceState)
-        mapView?.getMapAsync(this)
-        info("[onCreate] Mapbox object setup")
+        info("[onCreate] Mapbox object setup complete")
+
+        // asynchronously fetch coin map, then load the map
+        mapView?.getMapAsync { mapboxMap ->
+            map = mapboxMap
+            fetchCoinMap()
+            addMarkers()
+        }
 
         createOnClickListeners()
         info("[onCreate] created button press listeners")
-
-        coinzmapFile = "${act.filesDir.absolutePath}/${getString(R.string.coinmap_filename)}"
     }
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
@@ -73,15 +78,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     override fun onStart() {
         super.onStart()
 
-        mapView?.onStart()
-
         val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
         // use ”” as the default value (this might be the first time the app is run)
         downloadDate = settings.getString("lastDownloadDate", "")
         info("[onStart] last map load date = '$downloadDate'")
 
-        fetchCoinMap()
-//        coinMap = CoinMap().apply { loadMapFromFile(coinzmapFile) }
+        mapView?.onStart()
+        enableLocationPermissions()
     }
 
     override fun onResume() {
@@ -96,9 +99,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     override fun onStop() {
         super.onStop()
-
-        locationEngine.removeLocationUpdates()
-
+        map?.locationComponent?.isLocationComponentEnabled = false
         mapView?.onStop()
 
         val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
@@ -121,32 +122,49 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     override fun onDestroy() {
         super.onDestroy()
         mapView?.onDestroy()
-        locationEngine.deactivate()
     }
 
     private fun fetchCoinMap() {
-        // TODO download today's file and set the date
         val today = LocalDateTime.now()
         val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
 
         // if map is already today's map
         if (dateString == downloadDate && !DEBUG_MODE) {
-            info("[fetchCoinMap]: dateString = $dateString = downloadDate - halting...")
-            // return if downloadDate
-            return
+            info("[fetchCoinMap]: dateString = $dateString = downloadDate - loading...")
+        } else {
+            // make url from date pattern
+            info("[fetchCoinMap]: dateString = $dateString")
+            val url = "${getString(R.string.map_repo)}/$dateString/${getString(R.string.coinmap_filename)}"
+            info("[fetchCoinMap]: url = $url")
+
+            val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
+            doAsync {
+                coinMapDownloader.execute()
+            }
         }
 
-        // make url from date pattern
-        info("[fetchCoinMap]: dateString = $dateString")
-        val url = "${getString(R.string.map_repo)}/$dateString/${getString(R.string.coinmap_filename)}"
-        info("[fetchCoinMap]: url = $url")
+        coinMap.apply { loadMapFromFile(coinzmapFile) }
 
+        info("[fetchCoinMap]: map loaded : $coinMap")
+        if (!coinMap.isEmpty()) {
+            longToast("Map loaded successfully!")
+            downloadDate = dateString
+        } else {
+            longToast("Could not fetch map! Please check your connection.")
+        }
+    }
 
-        val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
-        coinMapDownloader.execute()
-        coinMap = CoinMap().apply { loadMapFromFile(coinzmapFile) }
-
-        downloadDate = dateString
+    private fun addMarkers() {
+        if (!coinMap.isEmpty()) {
+            for (wildCoin in coinMap.coins) {
+                map?.addMarker(MarkerOptions()
+                        .position(wildCoin.asLatLng())
+                        .title(wildCoin.properties.markerSymbol.toString()))
+            }
+            info("[addMarkers] added coin markers ---")
+        } else {
+            info("[addMarkers] coinMap is empty! no markers...")
+        }
 
     }
 
@@ -159,136 +177,51 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         val dolrBtn = CoinButton(applicationContext, getString(R.string.curr_dolr), button_dolr)
         val quidBtn = CoinButton(applicationContext, getString(R.string.curr_quid), button_quid)
         val penyBtn = CoinButton(applicationContext, getString(R.string.curr_peny), button_peny)
-
     }
 
-    // when map is ready, set map panning bounds
-    override fun onMapReady(mapboxMap: MapboxMap?) {
-        if (mapboxMap == null) {
-            info("[onMapReady] mapboxMap null!")
+    private fun enableLocationPermissions() {
+        if (ContextCompat.checkSelfPermission(this@MainActivity, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            info("[enableLocationPermissions] Location Permission [ON]")
+//            checkPermission(android.Manifest.permission.ACCESS_FINE_LOCATION, Process.myPid(), Process.myUid())
+            map?.locationComponent?.apply {
+                activateLocationComponent(this@MainActivity)
+                isLocationComponentEnabled = true
+            }
         } else {
-            debug("[onMapReady] mapboxMap found")
-            map = mapboxMap
-
-            val icon: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.custom_marker)
-            map?.addImage(MARKER_IMAGE, icon)
-            enableLocation()
-            addMarkers()
-        }
-    }
-
-    private fun addMarkers() {
-        var features: List<Feature> = ArrayList()
-
-        for (wildCoin in coinMap.coins) {
-//                features += wildCoin.asFeature()
-            map?.addMarker(MarkerOptions()
-                    .position(wildCoin.asLatLng())
-                    .title(wildCoin.properties.markerSymbol.toString()))
-
-        }
-        info("[mapbox] added eiffel tower ---")
-        map?.addMarker(MarkerOptions()
-                .position(LatLng(48.85819, 2.29458))
-                .title("Eiffel Tower"))
-//        map?.addSource(source)
-
-
-        val markerStyleLayer = SymbolLayer(MARKER_STYLE_LAYER, MARKER_SOURCE)
-                .withProperties(
-                        PropertyFactory.iconAllowOverlap(true),
-                        PropertyFactory.iconImage(MARKER_IMAGE)
-                )
-        map?.addLayer(markerStyleLayer)
-
-    }
-
-    private fun enableLocation() {
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
-            debug("Location Permission [ON]")
-            initializeLocationEngine()
-            initializeLocationLayer()
-        } else {
-            debug("Location Permission [OFF]")
+            info("[enableLocationPermissions] Location Permission [OFF] -- requesting")
             permissionsManager = PermissionsManager(this)
             permissionsManager.requestLocationPermissions(this)
         }
     }
 
-    @SuppressWarnings("MissingPermission")
-    private fun initializeLocationEngine() {
-        locationEngine = LocationEngineProvider(this).obtainBestLocationEngineAvailable()
-        locationEngine.apply {
-            interval = 5000
-            fastestInterval = 1000
-            priority = LocationEnginePriority.HIGH_ACCURACY
-            activate()
-        }
-
-        val lastLocation = locationEngine.lastLocation
-
-        if (lastLocation != null) {
-            originLocation = lastLocation
-            setCameraPosition(lastLocation)
-        } else {
-            locationEngine.addLocationEngineListener(this)
-        }
-    }
-
-    @SuppressWarnings("MissingPermission")
-    private fun initializeLocationLayer() {
-        if (mapView == null) {
-            debug("mapView is null")
-        } else {
-            if (map == null) {
-                debug("map is null")
-            } else {
-                locationLayerPlugin = LocationLayerPlugin(mapView!!, map!!, locationEngine)
-                locationLayerPlugin.apply {
-                    isLocationLayerEnabled = true // setLocationLayerEnabled(true)
-                    cameraMode = CameraMode.TRACKING
-                    renderMode = RenderMode.NORMAL
-                }
-            }
-        }
-    }
-
-    private fun setCameraPosition(location: Location) {
-        val latLng = LatLng(location.latitude, location.longitude)
-        map?.animateCamera(CameraUpdateFactory.newLatLng(latLng))
-    }
-
-    override fun onLocationChanged(location: Location?) {
-        if (location == null) {
-            debug("[onLocationChanged] location is null")
-        } else {
-            originLocation = location
-            setCameraPosition(originLocation)
-        }
-    }
-
-    @SuppressWarnings("MissingPermission")
-    override fun onConnected() {
-        debug("[onConnected] requesting location updates")
-        locationEngine.requestLocationUpdates()
-    }
-
-    // mapbox / permissions
-    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
-        debug("Permissions: $permissionsToExplain")
+// mapbox / permissions
+    override fun onExplanationNeeded(permsToExplain: MutableList<String>?) {
+//        info("Permissions: $permsToExplain")
+//        if (permsToExplain != null) {
+//            main_view.snackbar("Action, reaction", "Click me!") { enableLocationPermissions() }
+//        }
+//        if (!PermissionsManager.areLocationPermissionsGranted(this)) {
+//            longToast(R.string.location_explanation)
+//            main_view.snackbar("Action, reaction", "Click me!") { enableLocationPermissions() }
+//        }
         // toast or dialog to explain access
-        if (permissionsToExplain != null) {
-            for (permission in permissionsToExplain) {
-                toast(permission)
-            }
-        }
+//        if (permsToExplain != null) {
+        ////            for (perm in permsToExplain) {
+//            }
+//        }
     }
 
     override fun onPermissionResult(granted: Boolean) {
         if (granted) {
-            enableLocation()
+            enableLocationPermissions()
         } else {
-            onExplanationNeeded(mutableListOf(getString(R.string.location_explanation)))
+            alert {
+                title = "Please enable location!"
+                message = getString(R.string.location_explanation)
+                yesButton { enableLocationPermissions() }
+                noButton { }
+            }.show()
         }
     }
 
@@ -306,8 +239,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item!!.itemId) {
-            R.id.app_bar_settings -> toast("Settings item is clicked!")
-            android.R.id.home -> toast("you pressed the bank button!")
+            R.id.app_bar_settings -> toast("you pressed the settings button!")
+            R.id.home -> toast("you pressed the bank button!")
         }
         return true
     }

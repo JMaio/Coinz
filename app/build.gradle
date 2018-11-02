@@ -13,6 +13,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // fix runtime exception (java.lang.RuntimeException: com.android.build.api.transform.TransformException: java.lang.ArrayIndexOutOfBoundsException)
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -40,14 +42,22 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.0-beta-01'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-beta01'
+    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
 
     // location services
-    implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
     // mapbox
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.5.0'
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.5.2'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.6.1'
+//    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.8.2'
     // anko
-    implementation 'org.jetbrains.anko:anko-commons:0.10.4'
+    implementation "org.jetbrains.anko:anko-commons:$anko_version"
+    implementation "org.jetbrains.anko:anko-design:$anko_version" // For SnackBars
+    // json -> gson
+    implementation 'com.google.code.gson:gson:2.8.5'
+    // firebase
+    implementation 'com.google.firebase:firebase-core:16.0.4'
 }
+
+// also firebase
+apply plugin: 'com.google.gms.google-services'

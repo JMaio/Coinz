@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     private lateinit var coinzmapFile: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Coinz)
         super.onCreate(savedInstanceState)
 
         info("[onCreate] -- coinMap empty? ${coinMap.isEmpty()}")

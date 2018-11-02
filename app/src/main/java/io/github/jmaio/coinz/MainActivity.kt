@@ -63,6 +63,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         mapView?.onCreate(savedInstanceState)
         info("[onCreate] Mapbox object setup complete")
 
+        enableLocationPermissions()
+
         // asynchronously fetch coin map, then load the map
         mapView?.getMapAsync { mapboxMap ->
             map = mapboxMap
@@ -84,7 +86,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         info("[onStart] last map load date = '$downloadDate'")
 
         mapView?.onStart()
-        enableLocationPermissions()
     }
 
     override fun onResume() {
@@ -99,7 +100,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     override fun onStop() {
         super.onStop()
-        map?.locationComponent?.isLocationComponentEnabled = false
         mapView?.onStop()
 
         val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
@@ -181,20 +181,28 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         info("[onCreate] created button press listeners")
     }
 
-    private fun enableLocationPermissions() {
-        if (ContextCompat.checkSelfPermission(this@MainActivity, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            info("[enableLocationPermissions] Location Permission [ON]")
-//            checkPermission(android.Manifest.permission.ACCESS_FINE_LOCATION, Process.myPid(), Process.myUid())
+    private fun enableLocation() {
+        try {
             map?.locationComponent?.apply {
                 activateLocationComponent(this@MainActivity)
                 isLocationComponentEnabled = true
             }
+        } catch (e: SecurityException) {
+            enableLocationPermissions()
+        }
+    }
+
+    private fun enableLocationPermissions(): Boolean {
+        val permissionGranted = ContextCompat.checkSelfPermission(this@MainActivity, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        if (permissionGranted) {
+            info("[enableLocation] Location Permission [ON]")
+//            checkPermission(android.Manifest.permission.ACCESS_FINE_LOCATION, Process.myPid(), Process.myUid())
         } else {
-            info("[enableLocationPermissions] Location Permission [OFF] -- requesting")
+            info("[enableLocation] Location Permission [OFF] -- requesting")
             permissionsManager = PermissionsManager(this)
             permissionsManager.requestLocationPermissions(this)
         }
+        return permissionGranted
     }
 
 // mapbox / permissions
@@ -216,7 +224,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     override fun onPermissionResult(granted: Boolean) {
         if (granted) {
-            enableLocationPermissions()
+            enableLocation()
         } else {
             alert {
                 title = "Please enable location!"

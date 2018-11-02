@@ -71,7 +71,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         }
 
         createOnClickListeners()
-        info("[onCreate] created button press listeners")
     }
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
@@ -178,6 +177,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         val dolrBtn = CoinButton(applicationContext, getString(R.string.curr_dolr), button_dolr)
         val quidBtn = CoinButton(applicationContext, getString(R.string.curr_quid), button_quid)
         val penyBtn = CoinButton(applicationContext, getString(R.string.curr_peny), button_peny)
+
+        info("[onCreate] created button press listeners")
     }
 
     private fun enableLocationPermissions() {

@@ -68,12 +68,18 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         // asynchronously fetch coin map, then load the map
         mapView?.getMapAsync { mapboxMap ->
             map = mapboxMap
-            fetchCoinMap()
-            addMarkers()
+            doAsync {
+                fetchCoinMap()
+                uiThread {
+                    addMarkers()
+                }
+            }
+//            addMarkers()
         }
 
         createOnClickListeners()
     }
+
 
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     @SuppressWarnings("MissingPermission")
@@ -138,23 +144,25 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
             info("[fetchCoinMap]: url = $url")
 
             val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
-            doAsync {
-                coinMapDownloader.execute()
-            }
+            coinMapDownloader.execute()
         }
 
         coinMap.apply { loadMapFromFile(coinzmapFile) }
 
         info("[fetchCoinMap]: map loaded : $coinMap")
-        if (!coinMap.isEmpty()) {
-            longToast("Map loaded successfully!")
-            downloadDate = dateString
-        } else {
-            longToast("Could not fetch map! Please check your connection.")
+        runOnUiThread {
+            if (!coinMap.isEmpty()) {
+                longToast("Map loaded successfully!")
+                downloadDate = dateString
+            } else {
+                longToast("Could not fetch map! Please check your connection.")
+            }
         }
+
     }
 
     private fun addMarkers() {
+        info("[addMarkers] map = $map")
         if (!coinMap.isEmpty()) {
             for (wildCoin in coinMap.coins) {
                 map?.addMarker(MarkerOptions()

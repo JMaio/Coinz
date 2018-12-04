@@ -20,6 +20,12 @@ class LoginActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        text_welcome.setOnClickListener { view ->
+            // bypass login for testing
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
         sign_in_button.setOnClickListener { view ->
             info("[login] email '${email_input.text}', password length = ${password_input.text.length}")
             view.snackbar("Authenticating...")

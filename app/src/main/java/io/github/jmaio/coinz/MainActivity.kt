@@ -221,7 +221,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     private fun createOnClickListeners() {
         fab.setOnClickListener {
-            toast("you pressed the fab!")
+            val intent = Intent(this, WalletActivity::class.java)
+            startActivity(intent)
         }
 
         val shilBtn = CoinButton(applicationContext, getString(R.string.curr_shil), button_shil)

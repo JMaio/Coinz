@@ -2,6 +2,7 @@ package io.github.jmaio.coinz
 
 import org.jetbrains.anko.*
 import java.io.*
+import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -22,9 +23,15 @@ class DownloadFileTask(private val url: String, private val filename: String) : 
 
     private fun loadFileFromNetwork(urlString: String): String {
         // Read input from stream, build result as a string
-        val stream: InputStream = downloadUrl(urlString)
-        // buffer stream and return as string
-        return stream.bufferedReader().use { it.readText() }
+        var stream: InputStream? = null
+        return try {
+            stream = downloadUrl(urlString)
+            // buffer stream and return as string
+            stream.bufferedReader().use { it.readText() }
+        } catch (e: Exception) {
+            info("[loadFileFromNetwork] error: $e")
+            ""
+        }
     }
 
     @Throws(IOException::class)

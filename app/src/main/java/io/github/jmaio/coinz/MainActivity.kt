@@ -69,7 +69,12 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
         // asynchronously fetch coin map, then load the map
         mapView?.getMapAsync { mapboxMap ->
-            map = mapboxMap
+            map = mapboxMap.apply {
+                // set map bound and zoom prefs
+                setMinZoomPreference(14.5)
+                setMaxZoomPreference(18.0)
+                setLatLngBoundsForCameraTarget(CENTRAL_BOUNDS)
+            }
             doAsync {
                 fetchCoinMap()
                 uiThread {

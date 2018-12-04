@@ -18,6 +18,7 @@ import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.LocationComponent
+import com.mapbox.mapboxsdk.location.LocationComponentOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
@@ -90,14 +91,28 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                     addMarkers()
                 }
             }
+            val locationComponentOptions = LocationComponentOptions.builder(this)
+                    .maxZoom(18.0)
+                    .minZoom(14.5)
+                    .build()
             locationComponent = map!!.locationComponent
             info("[getMapAsync] created locationComponent")
-            enableLocation()
-        }
 
-        // show user id at the top of the screen
-        if (intent.extras != null) {
-            user_id_chip.text = intent.getStringExtra("id")
+            try {
+                locationComponent.apply {
+                    info("[getMapAsync] enabling location")
+                    activateLocationComponent(this@MainActivity, locationComponentOptions)
+                    isLocationComponentEnabled = true
+                    renderMode = RenderMode.NORMAL
+                    cameraMode = CameraMode.TRACKING
+                }
+            } catch (e: SecurityException)  {
+                alert {
+                    title = "Please enable location!"
+                    message = getString(R.string.location_explanation)
+                    isCancelable = false
+                }.show()
+            }
         }
 
         user = fbAuth.currentUser
@@ -231,25 +246,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         }
 
         info("[onCreate] created button press listeners")
-    }
-
-    // requires locationComponent to ensure it only runs if such a component exists
-    private fun enableLocation() {
-        info("[location] enabling location")
-        try {
-            locationComponent.apply {
-                activateLocationComponent(this@MainActivity, true)
-                isLocationComponentEnabled = true
-                renderMode = RenderMode.NORMAL
-                cameraMode = CameraMode.TRACKING
-            }
-        } catch (e: SecurityException)  {
-            alert {
-                title = "Please enable location!"
-                message = getString(R.string.location_explanation)
-                isCancelable = false
-            }.show()
-        }
     }
 
     // after mapbox

@@ -93,24 +93,24 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:elevation="6dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_account_balance_wallet_white_24dp"
-            mapbox:layout_anchor="@id/bottom_app_bar" />
-
         <com.google.android.material.bottomappbar.BottomAppBar
             android:id="@+id/bottom_app_bar"
-            android:elevation="6dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:backgroundTint="@color/colorPrimary"
+            android:elevation="6dp"
             app:fabAlignmentMode="center"
             app:menu="@menu/bottomappbar_menu"
             app:navigationIcon="@drawable/ic_account_balance_white_24dp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="6dp"
+            android:src="@drawable/ic_account_balance_wallet_white_24dp"
+            mapbox:layout_anchor="@id/bottom_app_bar" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

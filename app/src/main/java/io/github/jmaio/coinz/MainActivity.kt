@@ -2,12 +2,14 @@ package io.github.jmaio.coinz
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.firebase.auth.FirebaseAuth
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.mapboxsdk.Mapbox
@@ -32,6 +34,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     private var map: MapboxMap? = null
     private lateinit var locationComponent: LocationComponent
 
+    private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    val user = fbAuth.currentUser
 
     private val CENTRAL_BOUNDS = LatLngBounds.Builder()
             .include(LatLng(55.946233, -3.192473))
@@ -68,7 +72,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         mapView?.onCreate(savedInstanceState)
         info("[onCreate] Mapbox object setup complete")
 
-
         // asynchronously fetch coin map, then load the map
         mapView?.getMapAsync { mapboxMap ->
             map = mapboxMap.apply {
@@ -88,6 +91,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             locationComponent = map!!.locationComponent
             info("[getMapAsync] created locationComponent")
             enableLocation()
+        }
+
+        // show user id at the top of the screen
+        if (intent.extras != null) {
+            user_id_chip.text = intent.getStringExtra("id")
         }
 
         createOnClickListeners()
@@ -200,6 +208,20 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         val dolrBtn = CoinButton(applicationContext, getString(R.string.curr_dolr), button_dolr)
         val quidBtn = CoinButton(applicationContext, getString(R.string.curr_quid), button_quid)
         val penyBtn = CoinButton(applicationContext, getString(R.string.curr_peny), button_peny)
+
+        user_id_chip.setOnClickListener { view ->
+            info("[user_id_chip] pressed")
+            alert {
+                title = "Log Out?"
+                message = "Currently logged in as ${user?.email}.\nContinue?"
+                yesButton {
+                    fbAuth.signOut()
+                    startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                    this@MainActivity.finish()
+                }
+                noButton {}
+            }.show()
+        }
 
         info("[onCreate] created button press listeners")
     }

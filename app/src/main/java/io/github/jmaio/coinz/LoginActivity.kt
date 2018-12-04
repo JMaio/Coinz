@@ -70,7 +70,8 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     private fun gotoMain() {
         val intent = Intent(this, MainActivity::class.java)
-        intent.putExtra("id", fbAuth.currentUser?.email)
+        // try to pass the id of the current user - otherwise, pass "defaultUser"
+//        intent.putExtra("id", if (fbAuth.currentUser?.email != null) fbAuth.currentUser?.email else "defaultUser")
         startActivity(intent)
         this.finish()
     }

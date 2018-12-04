@@ -5,20 +5,28 @@ import android.os.Bundle
 import android.view.View
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
+import com.mapbox.android.core.permissions.PermissionsListener
+import com.mapbox.android.core.permissions.PermissionsManager
 
 import kotlinx.android.synthetic.main.activity_login.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.snackbar
 
-class LoginActivity : AppCompatActivity(), AnkoLogger {
+class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
+
+    private lateinit var permissionsManager: PermissionsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Coinz)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        enableLocationPermissions()
 
         text_welcome.setOnClickListener { view ->
             // bypass login for testing
@@ -81,5 +89,38 @@ class LoginActivity : AppCompatActivity(), AnkoLogger {
             }
         }
     }
+
+    fun areLocationPermissionsGranted(): Boolean =
+            ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+
+    fun enableLocationPermissions() {
+        if (areLocationPermissionsGranted()) {
+            info("[enableLocation] Location Permission [ON]")
+        } else {
+            info("[enableLocation] Location Permission [OFF] -- requesting")
+            permissionsManager = PermissionsManager(this)
+            permissionsManager.requestLocationPermissions(this)
+        }
+    }
+
+    // mapbox / permissions
+    override fun onExplanationNeeded(permsToExplain: MutableList<String>?) {}
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onPermissionResult(granted: Boolean) {
+        if (!granted) {
+            alert {
+                title = "Please enable location!"
+                message = getString(R.string.location_explanation)
+                isCancelable = false
+                yesButton { enableLocationPermissions() }
+            }.show()
+        }
+    }
+
 
 }

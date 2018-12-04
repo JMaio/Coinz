@@ -204,57 +204,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
                 activateLocationComponent(this@MainActivity)
                 isLocationComponentEnabled = true
             }
-        } catch (e: SecurityException) {
-            enableLocationPermissions()
-        }
-    }
-
-    private fun enableLocationPermissions(): Boolean {
-        val permissionGranted = ContextCompat.checkSelfPermission(this@MainActivity, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        if (permissionGranted) {
-            info("[enableLocation] Location Permission [ON]")
-//            checkPermission(android.Manifest.permission.ACCESS_FINE_LOCATION, Process.myPid(), Process.myUid())
-        } else {
-            info("[enableLocation] Location Permission [OFF] -- requesting")
-            permissionsManager = PermissionsManager(this)
-            permissionsManager.requestLocationPermissions(this)
-        }
-        return permissionGranted
-    }
-
-// mapbox / permissions
-    override fun onExplanationNeeded(permsToExplain: MutableList<String>?) {
-//        info("Permissions: $permsToExplain")
-//        if (permsToExplain != null) {
-//            main_view.snackbar("Action, reaction", "Click me!") { enableLocationPermissions() }
-//        }
-//        if (!PermissionsManager.areLocationPermissionsGranted(this)) {
-//            longToast(R.string.location_explanation)
-//            main_view.snackbar("Action, reaction", "Click me!") { enableLocationPermissions() }
-//        }
-        // toast or dialog to explain access
-//        if (permsToExplain != null) {
-        ////            for (perm in permsToExplain) {
-//            }
-//        }
-    }
-
-    override fun onPermissionResult(granted: Boolean) {
-        if (granted) {
-            enableLocation()
-        } else {
+        } catch (e: SecurityException)  {
             alert {
                 title = "Please enable location!"
                 message = getString(R.string.location_explanation)
-                yesButton { enableLocationPermissions() }
-                noButton { }
+                isCancelable = false
             }.show()
         }
-    }
-
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     // after mapbox

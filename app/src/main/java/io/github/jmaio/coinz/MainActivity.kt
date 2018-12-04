@@ -17,6 +17,8 @@ import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
+import org.jetbrains.anko.design.indefiniteSnackbar
+import org.jetbrains.anko.design.snackbar
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -155,7 +157,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
                 longToast("Map loaded successfully!")
                 downloadDate = dateString
             } else {
-                longToast("Could not fetch map! Please check your connection.")
+                main_view.indefiniteSnackbar("Could not fetch map! Please check your connection.", "retry?") {
+                    fetchCoinMap()
+                }
             }
         }
 

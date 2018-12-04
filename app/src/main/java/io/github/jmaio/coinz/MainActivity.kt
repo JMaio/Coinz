@@ -31,8 +31,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     private lateinit var permissionsManager: PermissionsManager
 
     private val CENTRAL_BOUNDS = LatLngBounds.Builder()
-            .include(LatLng(-3.192473, 55.946233))
-            .include(LatLng(-3.184319, 55.942617))
+            .include(LatLng(55.946233, -3.192473))
+            .include(LatLng(55.942617, -3.184319))
             .build()
 
     private val MARKER_SOURCE = "markers-source"

@@ -1,5 +1,6 @@
 package io.github.jmaio.coinz
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -13,22 +14,24 @@ import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.location.LocationComponent
+import com.mapbox.mapboxsdk.location.modes.CameraMode
+import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.indefiniteSnackbar
-import org.jetbrains.anko.design.snackbar
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
+class MainActivity : AppCompatActivity(), AnkoLogger {
 
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
+    private lateinit var locationComponent: LocationComponent
 
-    private lateinit var permissionsManager: PermissionsManager
 
     private val CENTRAL_BOUNDS = LatLngBounds.Builder()
             .include(LatLng(55.946233, -3.192473))
@@ -45,8 +48,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     private var coinMap: CoinMap = CoinMap()
     private lateinit var coinzmapFile: String
 
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.Coinz)
         super.onCreate(savedInstanceState)
 
         info("[onCreate] -- coinMap empty? ${coinMap.isEmpty()}")
@@ -65,7 +68,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         mapView?.onCreate(savedInstanceState)
         info("[onCreate] Mapbox object setup complete")
 
-        enableLocationPermissions()
 
         // asynchronously fetch coin map, then load the map
         mapView?.getMapAsync { mapboxMap ->
@@ -76,12 +78,16 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
                 setLatLngBoundsForCameraTarget(CENTRAL_BOUNDS)
             }
             doAsync {
+                // fetch coin map asynchronously
                 fetchCoinMap()
                 uiThread {
+                    // add markers on ui thread after fetching
                     addMarkers()
                 }
             }
-//            addMarkers()
+            locationComponent = map!!.locationComponent
+            info("[getMapAsync] created locationComponent")
+            enableLocation()
         }
 
         createOnClickListeners()
@@ -198,11 +204,15 @@ class MainActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         info("[onCreate] created button press listeners")
     }
 
+    // requires locationComponent to ensure it only runs if such a component exists
     private fun enableLocation() {
+        info("[location] enabling location")
         try {
-            map?.locationComponent?.apply {
-                activateLocationComponent(this@MainActivity)
+            locationComponent.apply {
+                activateLocationComponent(this@MainActivity, true)
                 isLocationComponentEnabled = true
+                renderMode = RenderMode.NORMAL
+                cameraMode = CameraMode.TRACKING
             }
         } catch (e: SecurityException)  {
             alert {

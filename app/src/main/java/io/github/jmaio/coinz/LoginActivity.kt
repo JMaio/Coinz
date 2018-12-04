@@ -14,10 +14,14 @@ import com.mapbox.android.core.permissions.PermissionsManager
 import kotlinx.android.synthetic.main.activity_login.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.snackbar
+import com.google.firebase.auth.FirebaseUser
+
+
 
 class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    val user = fbAuth.currentUser
 
     private lateinit var permissionsManager: PermissionsManager
 
@@ -28,10 +32,13 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
         enableLocationPermissions()
 
+        if (user != null) {
+            gotoMain()
+        }
+
+        // bypass login for testing
         text_welcome.setOnClickListener { view ->
-            // bypass login for testing
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            gotoMain()
         }
 
         sign_in_button.setOnClickListener { view ->
@@ -61,12 +68,17 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         }
     }
 
+    private fun gotoMain() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra("id", fbAuth.currentUser?.email)
+        startActivity(intent)
+        this.finish()
+    }
+
     private fun signInUser(email: String, password: String) {
         fbAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("id", fbAuth.currentUser?.email)
-                startActivity(intent)
+                gotoMain()
             } else {
                 alert {
                     title = "Error"
@@ -78,9 +90,7 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     private fun registerUser(email: String, password: String) {
         fbAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("id", fbAuth.currentUser?.email)
-                startActivity(intent)
+                gotoMain()
             } else {
                 alert {
                     title = "Error"

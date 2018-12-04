@@ -22,6 +22,8 @@ class LoginActivity : AppCompatActivity(), AnkoLogger {
 
         sign_in_button.setOnClickListener { view ->
             info("[login] email '${email_input.text}', password length = ${password_input.text.length}")
+            view.snackbar("Authenticating...")
+
             val email = email_input.text.toString()
             val password = password_input.text.toString()
             if (email.isNotEmpty() and password.isNotEmpty()) {
@@ -33,6 +35,8 @@ class LoginActivity : AppCompatActivity(), AnkoLogger {
 
         register_button.setOnClickListener { view ->
             info("[register] email '${email_input.text}', password length = ${password_input.text.length}")
+            view.snackbar("Registering...")
+
             val email = email_input.text.toString()
             val password = password_input.text.toString()
             if (email.isNotEmpty() and password.isNotEmpty()) {

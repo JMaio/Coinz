@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.google.firebase.auth.FirebaseUser
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -35,7 +36,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     private lateinit var locationComponent: LocationComponent
 
     private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    val user = fbAuth.currentUser
+    private var user: FirebaseUser? = null
+    private var userDisplay = "defaultUser"
 
     private val CENTRAL_BOUNDS = LatLngBounds.Builder()
             .include(LatLng(55.946233, -3.192473))
@@ -97,6 +99,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         if (intent.extras != null) {
             user_id_chip.text = intent.getStringExtra("id")
         }
+
+        user = fbAuth.currentUser
+        if (user?.email != null) userDisplay = user?.email.toString()
 
         createOnClickListeners()
     }
@@ -209,11 +214,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         val quidBtn = CoinButton(applicationContext, getString(R.string.curr_quid), button_quid)
         val penyBtn = CoinButton(applicationContext, getString(R.string.curr_peny), button_peny)
 
+        // show user id at the top of the screen
+        user_id_chip.text = userDisplay
         user_id_chip.setOnClickListener { view ->
             info("[user_id_chip] pressed")
             alert {
                 title = "Log Out?"
-                message = "Currently logged in as ${user?.email}.\nContinue?"
+                message = "Currently logged in as ${userDisplay}.\nContinue?"
                 yesButton {
                     fbAuth.signOut()
                     startActivity(Intent(this@MainActivity, LoginActivity::class.java))

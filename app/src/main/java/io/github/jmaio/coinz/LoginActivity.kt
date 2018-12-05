@@ -23,6 +23,12 @@ import java.lang.Exception
 class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
 
     private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance().apply {
+        firestoreSettings = FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build()
+    }
+
     val user = fbAuth.currentUser
 
     private lateinit var permissionsManager: PermissionsManager
@@ -90,10 +96,24 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
             }
         }
     }
+
     private fun registerUser(email: String, password: String) {
+        // register the user
         fbAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
-                gotoMain()
+                val newUser = fbAuth.currentUser
+                info("new user has id ${newUser?.uid}")
+                // create a new wallet with this ID
+                try {
+                    createFireBaseWallet(newUser!!.uid)
+                    gotoMain()
+                } catch (e: Exception){
+                    newUser!!.delete()
+                    alert {
+                        title = "Error"
+                        message = e.toString()
+                    }.show()
+                }
             } else {
                 alert {
                     title = "Error"
@@ -101,6 +121,26 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
                 }.show()
             }
         }
+    }
+
+    private fun createFireBaseWallet(uid: String) {
+        // and create a wallet
+        val wallet = HashMap<String, Any>()
+        wallet["userUID"] = uid
+        wallet["coins"] = emptyList<Coin>()
+        wallet["gold"] = 0.0
+        info("[createFireBaseWallet] entered create method + set wallet val")
+
+        // Add a new document with a generated ID
+        db.collection("wallets")
+                .add(wallet)
+                .addOnSuccessListener { documentReference ->
+                    info("[createFireBaseWallet] DocumentSnapshot added with ID: ${documentReference.id}")
+                }
+                .addOnFailureListener { e ->
+                    info("[createFireBaseWallet] Error adding document: $e")
+                    throw Exception("something happened")
+                }
     }
 
     fun areLocationPermissionsGranted(): Boolean =

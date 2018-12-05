@@ -202,18 +202,58 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     }
 
-    private fun addMarkers() {
+    fun addMarkers() {
         info("[addMarkers] map = $map")
+        listOf(
+                getString(R.string.curr_shil),
+                getString(R.string.curr_dolr),
+                getString(R.string.curr_quid),
+                getString(R.string.curr_peny)
+        ).forEach { c ->
+            addMarkers(c)
+        }
+    }
+
+    fun addMarkers(c: String) {
+        info("[addMarkers] adding markers for currency: $c")
         if (!coinMap.isEmpty()) {
-            for (wildCoin in coinMap.coins) {
+            for (wildCoin in coinMap.coins.filter { coin -> coin.properties.currency == c }) {
                 map?.addMarker(MarkerOptions()
                         .position(wildCoin.asLatLng())
-                        .title(wildCoin.properties.markerSymbol.toString()))
+                        // store the currency
+                        .title(wildCoin.properties.currency)
+                        // and the id
+                        .snippet(wildCoin.properties.id)
+                )
             }
-            info("[addMarkers] added coin markers ---")
-        } else {
-            info("[addMarkers] coinMap is empty! no markers...")
         }
+    }
+    fun removeMarkers() {
+        info("[removeMarkers] map = $map")
+        map?.clear()
+    }
+
+    fun removeMarkers(c: String) {
+        info("[removeMarkers] removing markers for currency: $c")
+        map?.markers?.filter { marker ->
+            marker.title == c
+        }?.forEach { marker ->
+            map?.removeMarker(marker)
+        }
+    }
+    fun removeMarkerByID(id: String) {
+        info("[removeMarker] removing markers for currency: $id")
+        map?.markers?.filter { marker ->
+            marker.snippet == id
+        }?.forEach { marker ->
+            map?.removeMarker(marker)
+        }
+    }
+
+    fun collectCoinFromMap(id: String) {
+        coinMap.collectCoin(id)
+        removeMarkerByID(id)
+    }
 
     }
 
@@ -226,10 +266,20 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             startActivity(Intent(this, BankActivity::class.java))
         }
 
-        val shilBtn = CoinButton(applicationContext, getString(R.string.curr_shil), button_shil)
-        val dolrBtn = CoinButton(applicationContext, getString(R.string.curr_dolr), button_dolr)
-        val quidBtn = CoinButton(applicationContext, getString(R.string.curr_quid), button_quid)
-        val penyBtn = CoinButton(applicationContext, getString(R.string.curr_peny), button_peny)
+        val buttons = listOf(button_shil, button_dolr, button_quid, button_peny)
+
+        // map markers
+        buttons.forEach { btn ->
+            btn.setOnCheckedChangeListener { buttonView, isChecked ->
+                toast("${btn.text} was pressed, now $isChecked")
+                debug("[coinButton] button '$btn' pressed --> $isChecked")
+                if (isChecked) {
+                    addMarkers(btn.text.toString())
+                } else {
+                    removeMarkers(btn.text.toString())
+                }
+            }
+        }
 
         // show user id at the top of the screen
         user_id_chip.text = userDisplay

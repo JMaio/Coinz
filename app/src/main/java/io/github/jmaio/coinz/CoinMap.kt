@@ -41,9 +41,6 @@ class WildCoin(
 ) {
     val lng = geometry.coordinates[0]
     val lat = geometry.coordinates[1]
-    fun asFeature(): Feature {
-        return Feature.fromGeometry(Point.fromLngLat(lat, lng))
-    }
 
     fun asLatLng(): LatLng {
         return LatLng(lat, lng)

@@ -1,8 +1,10 @@
 package io.github.jmaio.coinz
 
-import org.jetbrains.anko.*
-import java.io.*
-import java.lang.Exception
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 

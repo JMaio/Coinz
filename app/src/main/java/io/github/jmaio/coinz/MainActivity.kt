@@ -3,15 +3,12 @@ package io.github.jmaio.coinz
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
-import com.mapbox.android.core.permissions.PermissionsListener
-import com.mapbox.android.core.permissions.PermissionsManager
 import com.google.firebase.auth.FirebaseUser
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
@@ -35,6 +32,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
     private lateinit var locationComponent: LocationComponent
+    private var originLocation: Location? = null
 
     private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
     private var user: FirebaseUser? = null

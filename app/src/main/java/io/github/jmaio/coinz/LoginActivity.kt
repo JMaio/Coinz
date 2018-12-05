@@ -1,21 +1,23 @@
 package io.github.jmaio.coinz
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.view.View
-
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
-
 import kotlinx.android.synthetic.main.activity_login.*
-import org.jetbrains.anko.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.design.snackbar
-import com.google.firebase.auth.FirebaseUser
-
+import org.jetbrains.anko.info
+import org.jetbrains.anko.yesButton
+import java.lang.Exception
 
 
 class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {

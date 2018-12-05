@@ -221,8 +221,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     private fun createOnClickListeners() {
         fab.setOnClickListener {
-            val intent = Intent(this, WalletActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, WalletActivity::class.java))
+        }
+
+        bottom_app_bar.setNavigationOnClickListener {
+            startActivity(Intent(this, BankActivity::class.java))
         }
 
         val shilBtn = CoinButton(applicationContext, getString(R.string.curr_shil), button_shil)
@@ -258,8 +261,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item!!.itemId) {
-            R.id.app_bar_settings -> toast("you pressed the settings button!")
-            R.id.home -> toast("you pressed the bank button!")
+            R.id.app_bar_settings -> startActivity(Intent(this, SettingsActivity::class.java))
         }
         return true
     }

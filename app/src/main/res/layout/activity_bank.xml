@@ -46,6 +46,7 @@
             android:layout_weight="0"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:theme="@style/Base.Theme.MaterialComponents.Light"
             app:cardCornerRadius="24dp"
             app:cardElevation="1dp"
             app:contentPadding="8dp">
@@ -107,6 +108,7 @@
             android:layout_weight="0"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:theme="@style/Base.Theme.MaterialComponents.Light"
             app:cardCornerRadius="24dp"
             app:cardElevation="1dp"
             app:contentPadding="8dp">
@@ -168,6 +170,7 @@
             android:layout_weight="0"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:theme="@style/Base.Theme.MaterialComponents.Light"
             app:cardCornerRadius="24dp"
             app:cardElevation="1dp"
             app:contentPadding="8dp">
@@ -229,6 +232,7 @@
             android:layout_weight="0"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:theme="@style/Base.Theme.MaterialComponents.Light"
             app:cardCornerRadius="24dp"
             app:cardElevation="1dp"
             app:contentPadding="8dp">

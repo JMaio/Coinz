@@ -16,10 +16,10 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 data class Rates(
-        @SerializedName("SHIL") val shilRate: Double,
-        @SerializedName("DOLR") val dolrRate: Double,
-        @SerializedName("QUID") val quidRate: Double,
-        @SerializedName("PENY") val penyRate: Double
+        @SerializedName("SHIL") val SHIL: Double,
+        @SerializedName("DOLR") val DOLR: Double,
+        @SerializedName("QUID") val QUID: Double,
+        @SerializedName("PENY") val PENY: Double
 )
 
 data class Properties(
@@ -51,7 +51,7 @@ class WildCoin(
 class CoinMap : AnkoLogger {
     lateinit var day: Calendar
 
-    var coins: List<WildCoin> = ArrayList()
+    var coins: List<WildCoin> = emptyList()
 
     val gson = Gson()
 
@@ -68,17 +68,23 @@ class CoinMap : AnkoLogger {
             info("[loadMapFromFile] : GeoJSON parse OK -- $j")
 
             rates = gson.fromJson(j.get("rates"), Rates::class.java)
+
             val features = j.get("features").asJsonArray
+
+            info("[loadMapFromFile] : GeoJSON contains ${features.size()} features")
+
+            coins = emptyList()
 
             for (i in 0 until features.size()) {
                 val f = features.get(i).asJsonObject
                 val props = gson.fromJson(f.get("properties").asJsonObject, Properties::class.java)
                 val geometry = gson.fromJson(f.get("geometry").asJsonObject, Geometry::class.java)
 
+                // don't add this coin if has already been collected!!
                 coins += WildCoin(props, geometry)
             }
 
-            info("[loadMapFromFile] : coins : $coins")
+            info("[loadMapFromFile] : contains ${coins.size} coins")
         } catch (e: FileNotFoundException) {
             info("[loadMapFromFile]: file not found!")
             e.printStackTrace()
@@ -88,6 +94,24 @@ class CoinMap : AnkoLogger {
             e.printStackTrace()
         } finally {
 
+        }
+    }
+
+    fun collectCoin(id: String) {
+        // find the coin by id
+        val wildCoin = coins.find { coin ->
+            coin.properties.id == id
+        }
+        if (wildCoin != null) {
+            val collectedCoin = Coin(
+                    wildCoin.properties.id,
+                    wildCoin.properties.currency,
+                    wildCoin.properties.value
+            )
+            // add to firebase wallet as collected
+            //
+
+            coins -= wildCoin
         }
     }
 

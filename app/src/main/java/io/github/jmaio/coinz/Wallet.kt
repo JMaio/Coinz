@@ -1,9 +1,10 @@
 package io.github.jmaio.coinz
 
-class Wallet {
-    val id = null
+class Wallet (val id: String) {
     // store a user's gold as Double
     var gold: Double = 0.0
+
+    var coinList = emptyList<Coin>()
 
     // collect or earn coin from another player
     fun getCoin(coin: Coin) {

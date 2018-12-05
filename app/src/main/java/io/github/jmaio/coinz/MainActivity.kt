@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     private var coinMap: CoinMap = CoinMap()
     private lateinit var coinzmapFile: String
 
+    public lateinit var wallet: Wallet
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +69,12 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
         setSupportActionBar(bottom_app_bar)
 
+        user = fbAuth.currentUser
+        if (user?.email != null) userDisplay = user?.email.toString()
+
+
+        createOnClickListeners()
+
         coinzmapFile = "${this.filesDir.absolutePath}/${getString(R.string.coinmap_filename)}"
 
         mapView = findViewById(R.id.map_view)
@@ -80,18 +88,16 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                 setMinZoomPreference(14.5)
                 setMaxZoomPreference(18.0)
                 setLatLngBoundsForCameraTarget(CENTRAL_BOUNDS)
-            }
-            doAsync {
-                // fetch coin map asynchronously
-                fetchCoinMap()
-                uiThread {
-                    // add markers on ui thread after fetching
-                    addMarkers()
+                setOnMarkerClickListener { marker ->
+                    collectCoinFromMap(marker.snippet)
+                    toast("${marker.snippet} collected! coinMap now has ${coinMap.coins.size} coins")
+                    true
                 }
             }
+
             val locationComponentOptions = LocationComponentOptions.builder(this)
-                    .maxZoom(18.0)
                     .minZoom(14.5)
+                    .maxZoom(18.0)
                     .build()
             locationComponent = map!!.locationComponent
             info("[getMapAsync] created locationComponent")
@@ -104,6 +110,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                     renderMode = RenderMode.NORMAL
                     cameraMode = CameraMode.TRACKING
                 }
+                trackLocation()
             } catch (e: SecurityException)  {
                 alert {
                     title = "Please enable location!"
@@ -112,11 +119,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                 }.show()
             }
         }
-
-        user = fbAuth.currentUser
-        if (user?.email != null) userDisplay = user?.email.toString()
-
-        createOnClickListeners()
     }
 
 
@@ -129,6 +131,14 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         // use ”” as the default value (this might be the first time the app is run)
         downloadDate = settings.getString("lastDownloadDate", "")
         info("[onStart] last map load date = '$downloadDate'")
+
+        doAsync {
+            fetchCoinMap()
+            uiThread {
+                removeMarkers()
+                addMarkers()
+            }
+        }
 
         mapView?.onStart()
     }
@@ -169,7 +179,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         mapView?.onDestroy()
     }
 
-    private fun fetchCoinMap() {
+    fun fetchCoinMap() {
         val today = LocalDateTime.now()
         val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
 
@@ -185,7 +195,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
             coinMapDownloader.execute()
         }
-
         coinMap.apply { loadMapFromFile(coinzmapFile) }
 
         info("[fetchCoinMap]: map loaded : $coinMap")
@@ -255,6 +264,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         removeMarkerByID(id)
     }
 
+    private fun trackLocation() {
+
     }
 
     private fun createOnClickListeners() {
@@ -282,19 +293,21 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         }
 
         // show user id at the top of the screen
-        user_id_chip.text = userDisplay
-        user_id_chip.setOnClickListener { view ->
-            info("[user_id_chip] pressed")
-            alert {
-                title = "Log Out?"
-                message = "Currently logged in as ${userDisplay}.\nContinue?"
-                yesButton {
-                    fbAuth.signOut()
-                    startActivity(Intent(this@MainActivity, LoginActivity::class.java))
-                    this@MainActivity.finish()
-                }
-                noButton {}
-            }.show()
+        user_id_chip.apply {
+            text = userDisplay
+            setOnClickListener { view ->
+                info("[user_id_chip] pressed")
+                alert {
+                    title = "Log Out?"
+                    message = "Currently logged in as ${userDisplay}.\nContinue?"
+                    yesButton {
+                        fbAuth.signOut()
+                        startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                        this@MainActivity.finish()
+                    }
+                    noButton {}
+                }.show()
+            }
         }
 
         info("[onCreate] created button press listeners")
@@ -308,6 +321,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        info("clicked $item, id: ${item?.itemId}")
         when (item!!.itemId) {
             R.id.app_bar_settings -> startActivity(Intent(this, SettingsActivity::class.java))
         }

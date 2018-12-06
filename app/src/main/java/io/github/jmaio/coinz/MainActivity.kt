@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     private var downloadDate = "" // Format: YYYY/MM/DD
     private val DEBUG_MODE = false
 
-    private var coinMap: CoinMap = CoinMap()
+    private var coinMap: CoinMap? = null
     private lateinit var coinzmapFile: String
 
     public lateinit var wallet: Wallet
@@ -58,8 +58,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        info("[onCreate] -- coinMap empty? ${coinMap.isEmpty()}")
 
         // Mapbox access token is configured here. This needs to be called either in your application
         // object or in the same activity which contains the mapview.
@@ -71,7 +69,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
         user = fbAuth.currentUser
         if (user?.email != null) userDisplay = user?.email.toString()
-
 
         createOnClickListeners()
 
@@ -90,7 +87,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                 setLatLngBoundsForCameraTarget(CENTRAL_BOUNDS)
                 setOnMarkerClickListener { marker ->
                     collectCoinFromMap(marker.snippet)
-                    toast("${marker.snippet} collected! coinMap now has ${coinMap.coins.size} coins")
+                    toast("${marker.snippet} collected! coinMap now has ${coinMap?.coins?.size} coins")
                     true
                 }
             }
@@ -182,7 +179,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     fun fetchCoinMap() {
         val today = LocalDateTime.now()
         val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
-
+        val maker = CoinMapMaker()
         // if map is already today's map
         if (dateString == downloadDate && !DEBUG_MODE) {
             info("[fetchCoinMap]: dateString = $dateString = downloadDate - loading...")
@@ -195,11 +192,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
             coinMapDownloader.execute()
         }
-        coinMap.apply { loadMapFromFile(coinzmapFile) }
+        coinMap = maker.loadMapFromFile(coinzmapFile)
 
         info("[fetchCoinMap]: map loaded : $coinMap")
         runOnUiThread {
-            if (!coinMap.isEmpty()) {
+            if (coinMap != null && !coinMap!!.isEmpty()) {
                 longToast("Map loaded successfully!")
                 downloadDate = dateString
             } else {
@@ -225,8 +222,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     fun addMarkers(c: String) {
         info("[addMarkers] adding markers for currency: $c")
-        if (!coinMap.isEmpty()) {
-            for (wildCoin in coinMap.coins.filter { coin -> coin.properties.currency == c }) {
+        if (coinMap != null) {
+            for (wildCoin in coinMap!!.coins.filter { coin -> coin.properties.currency == c }) {
                 map?.addMarker(MarkerOptions()
                         .position(wildCoin.asLatLng())
                         // store the currency
@@ -260,7 +257,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     }
 
     fun collectCoinFromMap(id: String) {
-        coinMap.collectCoin(id)
+        coinMap?.collectCoin(id)
         removeMarkerByID(id)
     }
 

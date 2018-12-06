@@ -1,8 +1,11 @@
 package io.github.jmaio.coinz
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
+import com.google.protobuf.Internal
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -20,7 +23,16 @@ data class Rates(
         @SerializedName("DOLR") val DOLR: Double,
         @SerializedName("QUID") val QUID: Double,
         @SerializedName("PENY") val PENY: Double
-)
+) {
+    fun toDoubleArray(): Map<String, Double> {
+        return mapOf(
+                Pair("SHIL", SHIL),
+                Pair("DOLR", DOLR),
+                Pair("QUID", QUID),
+                Pair("PENY", PENY)
+        )
+    }
+}
 
 data class Properties(
         @SerializedName("id") val id: String,
@@ -47,55 +59,7 @@ class WildCoin(
     }
 }
 
-// class to keep maps of coins per day
-class CoinMap : AnkoLogger {
-    lateinit var day: Calendar
-
-    var coins: List<WildCoin> = emptyList()
-
-    val gson = Gson()
-
-    lateinit var rates: Rates
-
-    fun loadMapFromFile(file: String) {
-        info("[loadMapFromFile]: loading...")
-
-        try {
-            val s = File(file).inputStream().readBytes().toString(Charsets.UTF_8)
-            info("[loadMapFromFile] : read file OK ($file)")
-            val j = JsonParser().parse(s).asJsonObject
-
-            info("[loadMapFromFile] : GeoJSON parse OK -- $j")
-
-            rates = gson.fromJson(j.get("rates"), Rates::class.java)
-
-            val features = j.get("features").asJsonArray
-
-            info("[loadMapFromFile] : GeoJSON contains ${features.size()} features")
-
-            coins = emptyList()
-
-            for (i in 0 until features.size()) {
-                val f = features.get(i).asJsonObject
-                val props = gson.fromJson(f.get("properties").asJsonObject, Properties::class.java)
-                val geometry = gson.fromJson(f.get("geometry").asJsonObject, Geometry::class.java)
-
-                // don't add this coin if has already been collected!!
-                coins += WildCoin(props, geometry)
-            }
-
-            info("[loadMapFromFile] : contains ${coins.size} coins")
-        } catch (e: FileNotFoundException) {
-            info("[loadMapFromFile]: file not found!")
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        } finally {
-
-        }
-    }
+data class CoinMap(var coins: List<WildCoin>, var rates: Map<String, Double>) {
 
     fun collectCoin(id: String) {
         // find the coin by id
@@ -119,4 +83,53 @@ class CoinMap : AnkoLogger {
         return coins.isEmpty()
     }
 
+}
+
+// class to keep maps of coins per day
+class CoinMapMaker() : AnkoLogger {
+    private val gson = Gson()
+
+    fun loadMapFromFile(file: String): CoinMap? {
+        info("[loadMapFromFile]: loading...")
+
+        var coinMap: CoinMap? = null
+
+        try {
+            val s = File(file).inputStream().readBytes().toString(Charsets.UTF_8)
+            info("[loadMapFromFile] : read file OK ($file)")
+            val j = JsonParser().parse(s).asJsonObject
+
+            info("[loadMapFromFile] : GeoJSON parse OK -- $j")
+
+            coinMap = CoinMap(
+                    emptyList(),
+                    gson.fromJson(j.get("rates"), Rates::class.java).toDoubleArray()
+            )
+
+                    val features = j.get("features").asJsonArray
+
+            info("[loadMapFromFile] : GeoJSON contains ${features.size()} features")
+
+
+            for (i in 0 until features.size()) {
+                val f = features.get(i).asJsonObject
+                val props = gson.fromJson(f.get("properties").asJsonObject, Properties::class.java)
+                val geometry = gson.fromJson(f.get("geometry").asJsonObject, Geometry::class.java)
+
+                // don't add this coin if has already been collected!!
+                coinMap.coins += WildCoin(props, geometry)
+            }
+
+            info("[loadMapFromFile] : contains ${coinMap.coins.size} coins")
+        } catch (e: FileNotFoundException) {
+            info("[loadMapFromFile]: file not found!")
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } catch (e: JSONException) {
+            e.printStackTrace()
+        } finally {
+            return coinMap
+        }
+    }
 }

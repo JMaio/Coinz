@@ -40,8 +40,8 @@ class DownloadFileTask(private val url: String, private val filename: String) : 
     private fun downloadUrl(urlString: String): InputStream {
         val url = URL(urlString)
         val conn = url.openConnection() as HttpURLConnection
-        conn.readTimeout = 10000
-        conn.connectTimeout = 15000
+        conn.readTimeout = 6000
+        conn.connectTimeout = 9000
         conn.requestMethod = "GET"
         conn.doInput = true
         conn.connect()

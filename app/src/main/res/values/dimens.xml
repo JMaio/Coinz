@@ -1,5 +1,16 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+
+    <!-- Cards on mobile default to 8dp margins. {@code layout_margin} needs to be set directly on a
+      {@link View} in its layout and won't work when included as part of a style. -->
+    <dimen name="mtrl_card_spacing" tools:override="true">8dp</dimen>
+    <!-- Default elevation for {@link MaterialCardView}. -->
+    <dimen name="mtrl_card_elevation" tools:override="true">1dp</dimen>
+    <!-- Default corner radius for {@link MaterialCardView}. -->
+    <dimen name="mtrl_card_corner_radius">4dp</dimen>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

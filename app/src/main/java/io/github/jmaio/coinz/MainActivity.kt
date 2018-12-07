@@ -65,6 +65,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
         setSupportActionBar(bottom_app_bar)
 
+        currencies = listOf(
+                getString(R.string.curr_shil),
+                getString(R.string.curr_dolr),
+                getString(R.string.curr_quid),
+                getString(R.string.curr_peny)
+        )
+
         user = fbAuth.currentUser
         if (user?.email != null) userDisplay = user?.email.toString()
 

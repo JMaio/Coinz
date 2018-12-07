@@ -55,6 +55,7 @@ dependencies {
 
     // mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:6.7.2'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation:0.3.0'
 
     // anko
     implementation "org.jetbrains.anko:anko-commons:$anko_version"

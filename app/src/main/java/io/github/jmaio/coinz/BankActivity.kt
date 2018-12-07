@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_bank.*
+import org.jetbrains.anko.toast
+import java.lang.Exception
 
 class BankActivity : AppCompatActivity() {
 
@@ -32,9 +34,13 @@ class BankActivity : AppCompatActivity() {
         if (coinMap != null) {
             transl.forEach { (curr, fields) ->
                 val r = coinMap?.rates?.toMap()?.get(curr).toString().split(".")
-                fields.apply {
-                    first.text = r[0].substring(0, 3)
-                    second.text = r[1].substring(0, 2)
+                try {
+                    fields.apply {
+                        first.text = r[0]
+                        second.text = r[1].substring(0, 2)
+                    }
+                } catch (e: Exception) {
+                    toast("Could not get today's rates. Error: ${e.message}")
                 }
             }
 //            coinMap?.rates?.toMap()?.forEach {

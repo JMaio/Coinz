@@ -26,7 +26,8 @@
         completions."
     </string>
     <string name="start_login">Please register an account below (or sign in if you already have one)</string>
-    <string name="title_activity_login2">Sign in</string>
-    <string name="action_sign_in_short">Sign in</string>
     <string name="action_register">Register</string>
+    <string name="title_activity_wallet">Coinz Wallet</string>
+    <string name="title_activity_bank">Coinz Bank</string>
+    <string name="title_activity_settings">Settings</string>
 </resources>

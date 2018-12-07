@@ -3,17 +3,20 @@ package io.github.jmaio.coinz
 import android.location.Location
 import android.os.Parcel
 import android.os.Parcelable
+import android.provider.CallLog
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
+import com.google.gson.stream.JsonWriter
 import com.google.protobuf.Internal
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.GeoJson
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
@@ -52,7 +55,8 @@ data class Properties(
         @SerializedName("value") val value: Double,
         @SerializedName("currency") val currency: String,
         @SerializedName("marker-symbol") val markerSymbol: Int,
-        @SerializedName("marker-color") val markerColor: String
+        @SerializedName("marker-color") val markerColor: String,
+        @SerializedName("icon-opacity") var iconOpacity: Float
 ): Parcelable
 
 @Parcelize
@@ -99,24 +103,19 @@ data class CoinMap(var coins: MutableList<WildCoin>,
     }
 
     fun toGeoJson(c: String): GeoJsonSource {
-        var coin = JsonParser().parse(features).asJsonArray.filter { f ->
-            f.asJsonObject["properties"].asJsonObject["currency"].asString == c }
-//        [0]
-//                .asJsonObject["properties"]
-//                .asJsonObject["currency"]
-        info("[toGeoJson] : $coin")
-//        return GeoJsonSource("hi")
-        val fs = arrayListOf<Feature>()
-        JsonParser().parse(features).asJsonArray.filter { f ->
-            f.asJsonObject["properties"].asJsonObject["currency"].asString == c }.forEach { jf ->
-            jf.asJsonObject["properties"].asJsonObject.addProperty(
-                    "icon-opacity",
-                    ceil((jf.asJsonObject["properties"].asJsonObject["marker-symbol"].asDouble + 1) / 5.0) / 2 )
-            info(jf)
-            fs.add(Feature.fromJson(jf.toString())) }
+//        updateFeatures()
+        val currCoins = Gson().toJson(coins.filter { coin -> coin.properties.currency == c })
+
+        val featureCollection = ArrayList<Feature>()
+        JsonParser().parse(currCoins).asJsonArray.forEach { f ->
+            f.asJsonObject.addProperty("type", "Feature")
+            info("feature $f")
+            featureCollection.add(Feature.fromJson(f.toString()))
+        }
+
         return GeoJsonSource(
                 "${c.toLowerCase()}_source",
-                FeatureCollection.fromFeatures(fs)
+                FeatureCollection.fromFeatures(featureCollection)
         )
     }
 }
@@ -152,6 +151,7 @@ class CoinMapMaker : AnkoLogger {
             for (i in 0 until features.size()) {
                 val f = features.get(i).asJsonObject
                 val props = gson.fromJson(f.get("properties").asJsonObject, Properties::class.java)
+                props.iconOpacity = ceil((props.markerSymbol + 1) / 5.0).toFloat() / 2
                 val geometry = gson.fromJson(f.get("geometry").asJsonObject, Geometry::class.java)
 
                 // don't add this coin if has already been collected!!

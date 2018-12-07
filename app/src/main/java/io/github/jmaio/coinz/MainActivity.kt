@@ -38,22 +38,20 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     private var user: FirebaseUser? = null
     private var userDisplay = "defaultUser"
 
-    private val CENTRAL_BOUNDS = LatLngBounds.Builder()
+    private val centralBounds = LatLngBounds.Builder()
             .include(LatLng(55.946233, -3.192473))
             .include(LatLng(55.942617, -3.184319))
             .build()
 
-    private val MARKER_SOURCE = "markers-source"
-    private val MARKER_STYLE_LAYER = "markers-style-layer"
-    private val MARKER_IMAGE = "custom-marker"
-
     private var downloadDate = "" // Format: YYYY/MM/DD
-    private val DEBUG_MODE = false
+    private var coinzDebugMode = true
 
     private var coinMap: CoinMap? = null
     private lateinit var coinzmapFile: String
 
-    public lateinit var wallet: Wallet
+    private lateinit var currencies: List<String>
+
+//    public lateinit var wallet: Wallet
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {

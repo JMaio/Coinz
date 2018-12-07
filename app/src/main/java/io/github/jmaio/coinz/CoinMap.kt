@@ -9,6 +9,7 @@ import com.google.protobuf.Internal
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
+import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.json.JSONException
@@ -18,39 +19,44 @@ import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
 
+@Parcelize
 data class Rates(
         @SerializedName("SHIL") val SHIL: Double,
         @SerializedName("DOLR") val DOLR: Double,
         @SerializedName("QUID") val QUID: Double,
         @SerializedName("PENY") val PENY: Double
-) {
-    fun toDoubleArray(): Map<String, Double> {
-        return mapOf(
-                Pair("SHIL", SHIL),
-                Pair("DOLR", DOLR),
-                Pair("QUID", QUID),
-                Pair("PENY", PENY)
-        )
-    }
-}
+): Parcelable
+//{
+//    fun toDoubleArray(): Map<String, Double> {
+//        return mapOf(
+//                Pair("SHIL", SHIL),
+//                Pair("DOLR", DOLR),
+//                Pair("QUID", QUID),
+//                Pair("PENY", PENY)
+//        )
+//    }
+//}
 
+@Parcelize
 data class Properties(
         @SerializedName("id") val id: String,
         @SerializedName("value") val value: Double,
         @SerializedName("currency") val currency: String,
         @SerializedName("marker-symbol") val markerSymbol: Int,
         @SerializedName("marker-color") val markerColor: String
-)
+): Parcelable
 
+@Parcelize
 data class Geometry(
         @SerializedName("type") val type: String,
         @SerializedName("coordinates") val coordinates: List<Double>
-)
+): Parcelable
 
-class WildCoin(
+@Parcelize
+data class WildCoin(
         @SerializedName("properties") val properties: Properties,
         @SerializedName("geometry") val geometry: Geometry
-) {
+): Parcelable {
     val lng = geometry.coordinates[0]
     val lat = geometry.coordinates[1]
 
@@ -59,7 +65,23 @@ class WildCoin(
     }
 }
 
-data class CoinMap(var coins: List<WildCoin>, var rates: Map<String, Double>) {
+@Parcelize
+data class CoinMap(var coins: MutableList<WildCoin>,
+                   var rates: Rates): Parcelable {
+
+//    constructor(parcel: Parcel) : this(
+//            parcel.readList(),
+//            parcel.readMap()
+//    )
+//
+//    override fun writeToParcel(dest: Parcel, flags: Int) {
+//        dest.writeList(coins)
+//        dest.writeMap(rates)
+//    }
+//
+//    override fun describeContents(): Int {
+//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//    }
 
     fun collectCoin(id: String) {
         // find the coin by id
@@ -75,7 +97,7 @@ data class CoinMap(var coins: List<WildCoin>, var rates: Map<String, Double>) {
             // add to firebase wallet as collected
             //
 
-            coins -= wildCoin
+            coins.remove(wildCoin)
         }
     }
 
@@ -83,10 +105,20 @@ data class CoinMap(var coins: List<WildCoin>, var rates: Map<String, Double>) {
         return coins.isEmpty()
     }
 
+//    companion object CREATOR : Parcelable.Creator<CoinMap> {
+//        override fun createFromParcel(parcel: Parcel): CoinMap {
+//            return CoinMap(parcel)
+//        }
+//
+//        override fun newArray(size: Int): Array<CoinMap?> {
+//            return arrayOfNulls(size)
+//        }
+//    }
+
 }
 
 // class to keep maps of coins per day
-class CoinMapMaker() : AnkoLogger {
+class CoinMapMaker : AnkoLogger {
     private val gson = Gson()
 
     fun loadMapFromFile(file: String): CoinMap? {
@@ -102,8 +134,8 @@ class CoinMapMaker() : AnkoLogger {
             info("[loadMapFromFile] : GeoJSON parse OK -- $j")
 
             coinMap = CoinMap(
-                    emptyList(),
-                    gson.fromJson(j.get("rates"), Rates::class.java).toDoubleArray()
+                    mutableListOf(),
+                    gson.fromJson(j.get("rates"), Rates::class.java)
             )
 
                     val features = j.get("features").asJsonArray
@@ -117,7 +149,7 @@ class CoinMapMaker() : AnkoLogger {
                 val geometry = gson.fromJson(f.get("geometry").asJsonObject, Geometry::class.java)
 
                 // don't add this coin if has already been collected!!
-                coinMap.coins += WildCoin(props, geometry)
+                coinMap.coins.add(WildCoin(props, geometry))
             }
 
             info("[loadMapFromFile] : contains ${coinMap.coins.size} coins")

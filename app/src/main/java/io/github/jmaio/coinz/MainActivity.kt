@@ -270,7 +270,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         }
 
         bottom_app_bar.setNavigationOnClickListener {
-            startActivity(Intent(this, BankActivity::class.java))
+            startActivity(Intent(this, BankActivity::class.java).
+                    putExtra("coinMap", coinMap))
         }
 
         val buttons = listOf(button_shil, button_dolr, button_quid, button_peny)

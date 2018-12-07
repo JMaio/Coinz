@@ -1,23 +1,32 @@
 package io.github.jmaio.coinz
 
+import android.location.Location
 import android.os.Parcel
 import android.os.Parcelable
 import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
 import com.google.protobuf.Internal
 import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.GeoJson
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.ceil
 
 @Parcelize
 data class Rates(
@@ -57,31 +66,15 @@ data class WildCoin(
         @SerializedName("properties") val properties: Properties,
         @SerializedName("geometry") val geometry: Geometry
 ): Parcelable {
-    val lng = geometry.coordinates[0]
-    val lat = geometry.coordinates[1]
-
     fun asLatLng(): LatLng {
-        return LatLng(lat, lng)
+        return LatLng(geometry.coordinates[0], geometry.coordinates[1])
     }
 }
 
 @Parcelize
 data class CoinMap(var coins: MutableList<WildCoin>,
-                   var rates: Rates): Parcelable {
-
-//    constructor(parcel: Parcel) : this(
-//            parcel.readList(),
-//            parcel.readMap()
-//    )
-//
-//    override fun writeToParcel(dest: Parcel, flags: Int) {
-//        dest.writeList(coins)
-//        dest.writeMap(rates)
-//    }
-//
-//    override fun describeContents(): Int {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-//    }
+                   var rates: Rates,
+                   var features: String): Parcelable, AnkoLogger {
 
     fun collectCoin(id: String) {
         // find the coin by id
@@ -105,16 +98,27 @@ data class CoinMap(var coins: MutableList<WildCoin>,
         return coins.isEmpty()
     }
 
-//    companion object CREATOR : Parcelable.Creator<CoinMap> {
-//        override fun createFromParcel(parcel: Parcel): CoinMap {
-//            return CoinMap(parcel)
-//        }
-//
-//        override fun newArray(size: Int): Array<CoinMap?> {
-//            return arrayOfNulls(size)
-//        }
-//    }
-
+    fun toGeoJson(c: String): GeoJsonSource {
+        var coin = JsonParser().parse(features).asJsonArray.filter { f ->
+            f.asJsonObject["properties"].asJsonObject["currency"].asString == c }
+//        [0]
+//                .asJsonObject["properties"]
+//                .asJsonObject["currency"]
+        info("[toGeoJson] : $coin")
+//        return GeoJsonSource("hi")
+        val fs = arrayListOf<Feature>()
+        JsonParser().parse(features).asJsonArray.filter { f ->
+            f.asJsonObject["properties"].asJsonObject["currency"].asString == c }.forEach { jf ->
+            jf.asJsonObject["properties"].asJsonObject.addProperty(
+                    "icon-opacity",
+                    ceil((jf.asJsonObject["properties"].asJsonObject["marker-symbol"].asDouble + 1) / 5.0) / 2 )
+            info(jf)
+            fs.add(Feature.fromJson(jf.toString())) }
+        return GeoJsonSource(
+                "${c.toLowerCase()}_source",
+                FeatureCollection.fromFeatures(fs)
+        )
+    }
 }
 
 // class to keep maps of coins per day
@@ -129,16 +133,18 @@ class CoinMapMaker : AnkoLogger {
         try {
             val s = File(file).inputStream().readBytes().toString(Charsets.UTF_8)
             info("[loadMapFromFile] : read file OK ($file)")
-            val j = JsonParser().parse(s).asJsonObject
+            val j = JsonParser().parse(s)
 
             info("[loadMapFromFile] : GeoJSON parse OK -- $j")
 
+            val features = j.asJsonObject.get("features").asJsonArray
+
             coinMap = CoinMap(
                     mutableListOf(),
-                    gson.fromJson(j.get("rates"), Rates::class.java)
+                    gson.fromJson(j.asJsonObject.get("rates"), Rates::class.java),
+                    features.toString()
             )
 
-                    val features = j.get("features").asJsonArray
 
             info("[loadMapFromFile] : GeoJSON contains ${features.size()} features")
 

@@ -82,13 +82,19 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         mapView?.getMapAsync { mapboxMap ->
             map = mapboxMap.apply {
                 // set map bound and zoom prefs
-                setMinZoomPreference(14.5)
-                setMaxZoomPreference(18.0)
                 setLatLngBoundsForCameraTarget(CENTRAL_BOUNDS)
                 setOnMarkerClickListener { marker ->
                     collectCoinFromMap(marker.snippet)
                     toast("${marker.snippet} collected! coinMap now has ${coinMap?.coins?.size} coins")
                     true
+                }
+            }
+
+            doAsync {
+                fetchCoinMap()
+                // "Map interactions should happen on the UI thread."
+                uiThread {
+                    addMarkers()
                 }
             }
 
@@ -129,15 +135,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         downloadDate = settings.getString("lastDownloadDate", "")
         info("[onStart] last map load date = '$downloadDate'")
 
-        doAsync {
-            fetchCoinMap()
-            uiThread {
-                removeMarkers()
-                addMarkers()
-            }
-        }
-
         mapView?.onStart()
+
     }
 
     override fun onResume() {

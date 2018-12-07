@@ -118,14 +118,16 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                     renderMode = RenderMode.NORMAL
                     cameraMode = CameraMode.TRACKING
                 }
-                trackLocation()
-            } catch (e: SecurityException)  {
+            } catch (e: SecurityException) {
                 alert {
                     title = "Please enable location!"
                     message = getString(R.string.location_explanation)
                     isCancelable = false
                 }.show()
+            } catch (e: Exception) {
+                info("location engine definition error: $e")
             }
+
         }
     }
 

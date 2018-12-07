@@ -26,16 +26,16 @@ data class Rates(
         @SerializedName("QUID") val QUID: Double,
         @SerializedName("PENY") val PENY: Double
 ): Parcelable
-//{
-//    fun toDoubleArray(): Map<String, Double> {
-//        return mapOf(
-//                Pair("SHIL", SHIL),
-//                Pair("DOLR", DOLR),
-//                Pair("QUID", QUID),
-//                Pair("PENY", PENY)
-//        )
-//    }
-//}
+{
+    fun toMap(): Map<String, Double> {
+        return mapOf(
+                Pair("SHIL", SHIL),
+                Pair("DOLR", DOLR),
+                Pair("QUID", QUID),
+                Pair("PENY", PENY)
+        )
+    }
+}
 
 @Parcelize
 data class Properties(

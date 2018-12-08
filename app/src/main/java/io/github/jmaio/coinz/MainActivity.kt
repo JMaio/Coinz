@@ -1,11 +1,11 @@
 package io.github.jmaio.coinz
 
+//import android.location.LocationListener
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.location.Location
-//import android.location.LocationListener
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -15,10 +15,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.annotations.*
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.LocationComponent
@@ -28,10 +26,8 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.mapboxsdk.style.expressions.Expression.get
 import com.mapbox.mapboxsdk.style.layers.Property.*
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
@@ -39,11 +35,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.indefiniteSnackbar
 import org.jetbrains.anko.design.longSnackbar
-import java.lang.Exception
+import org.jetbrains.anko.design.snackbar
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
@@ -331,20 +326,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         )
     }
 
-    private fun removeMarkers() {
-        info("[removeMarkers] map = $map")
-        map?.clear()
-    }
-
-    private fun removeMarkerByID(id: String) {
-        info("[removeMarker] removing markers for coin id: $id")
-        map?.markers?.filter { marker ->
-            marker.snippet == id
-        }?.forEach { marker ->
-            map?.removeMarker(marker)
-        }
-    }
-
     private fun collectCoinFromMap(wildCoin: WildCoin) {
         val curr = wildCoin.properties.currency.toLowerCase()
         val source = geoJsonSources[curr]
@@ -368,8 +349,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         // will try to add even if coin is already present
         db.collection("wallets").document(user.uid)
                 .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
-                .addOnSuccessListener { info("successfully added coin ${wildCoin.properties.id} to ${user!!.email}'s wallet") }
-                .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to ${user!!.email}'s wallet - $e") }
+                .addOnSuccessListener { info("successfully added coin ${wildCoin.properties.id} to ${user.email}'s wallet") }
+                .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to ${user.email}'s wallet - $e") }
 
         info("[addCoinToWallet] method complete")
     }

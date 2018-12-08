@@ -6,6 +6,7 @@ data class Coin(
         val value: Double?
 ) {
     constructor(): this("", "", .0)
+    constructor() : this("", "", .0)
 
     fun toMap(): HashMap<String?, Any?> {
         return hashMapOf(

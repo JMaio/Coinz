@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.mapbox.android.core.permissions.PermissionsListener
@@ -17,7 +16,6 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.info
 import org.jetbrains.anko.yesButton
-import java.lang.Exception
 
 
 class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
@@ -107,7 +105,7 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
                 try {
                     createFireBaseWallet(newUser!!.uid)
                     gotoMain()
-                } catch (e: Exception){
+                } catch (e: Exception) {
                     newUser!!.delete()
                     alert {
                         title = "Error"
@@ -133,7 +131,8 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         // Add a new document with a generated ID
         db.collection("wallets")
                 .document(uid).set(wallet)
-                .addOnSuccessListener { info("[createFireBaseWallet] DocumentSnapshot added with ID: $uid")
+                .addOnSuccessListener {
+                    info("[createFireBaseWallet] DocumentSnapshot added with ID: $uid")
                 }
                 .addOnFailureListener { e ->
                     info("[createFireBaseWallet] Error adding document: $e")

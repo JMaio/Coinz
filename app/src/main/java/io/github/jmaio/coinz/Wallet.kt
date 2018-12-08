@@ -1,15 +1,14 @@
 package io.github.jmaio.coinz
 
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-data class Wallet (
+data class Wallet(
         val gold: Double,
         val coins: MutableList<Coin>,
         var ids: MutableSet<String>
-): AnkoLogger {
+) : AnkoLogger {
 
-    constructor(): this(0.0, mutableListOf(), mutableSetOf())
+    constructor() : this(0.0, mutableListOf(), mutableSetOf())
 
     fun setIds() {
         coins.forEach { c ->

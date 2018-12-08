@@ -2,10 +2,8 @@ package io.github.jmaio.coinz
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_bank.*
 import org.jetbrains.anko.toast
-import java.lang.Exception
 
 class BankActivity : AppCompatActivity() {
 

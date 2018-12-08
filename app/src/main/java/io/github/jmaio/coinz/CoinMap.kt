@@ -14,8 +14,6 @@ import org.json.JSONException
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.lang.Exception
-import kotlin.collections.ArrayList
 import kotlin.math.ceil
 
 @Parcelize
@@ -24,8 +22,7 @@ data class Rates(
         @SerializedName("DOLR") val DOLR: Double,
         @SerializedName("QUID") val QUID: Double,
         @SerializedName("PENY") val PENY: Double
-): Parcelable
-{
+) : Parcelable {
     fun toMap(): Map<String, Double> {
         return mapOf(
                 Pair("SHIL", SHIL),
@@ -44,33 +41,35 @@ data class Properties(
         @SerializedName("marker-symbol") val markerSymbol: Int,
         @SerializedName("marker-color") val markerColor: String,
         @SerializedName("icon-opacity") var iconOpacity: Float
-): Parcelable
+) : Parcelable
 
 @Parcelize
 data class Geometry(
         @SerializedName("type") val type: String,
         @SerializedName("coordinates") val coordinates: List<Double>
-): Parcelable
+) : Parcelable
 
 @Parcelize
 data class WildCoin(
         @SerializedName("properties") val properties: Properties,
         @SerializedName("geometry") val geometry: Geometry
-): Parcelable {
+) : Parcelable {
     fun asLatLng(): LatLng {
         return LatLng(geometry.coordinates[1], geometry.coordinates[0])
     }
+
     fun toCoin(): Coin {
         properties.let { p ->
             return Coin(p.id, p.currency, p.value)
         }
     }
 }
+
 @Parcelize
 data class CoinMap(var coins: MutableList<WildCoin>,
                    var allCoins: List<WildCoin>,
                    var rates: Rates,
-                   var features: String): Parcelable, AnkoLogger {
+                   var features: String) : Parcelable, AnkoLogger {
 
     fun collectCoin(wildCoin: WildCoin) {
         // find the coin by id
@@ -82,8 +81,8 @@ data class CoinMap(var coins: MutableList<WildCoin>,
                 wildCoin.properties.currency,
                 wildCoin.properties.value
         )
-            // add to firebase wallet as collected
-            //
+        // add to firebase wallet as collected
+        //
         try {
             coins.remove(wildCoin)
             info("removed coin $wildCoin")
@@ -151,7 +150,7 @@ class CoinMapMaker(var wallet: Wallet) : AnkoLogger {
 
 
             info("[loadMapFromFile] : GeoJSON contains ${features.size()} features")
-            val allCoins =  mutableListOf<WildCoin>()
+            val allCoins = mutableListOf<WildCoin>()
 //            val collectedCoins = db
             info("wallet ids: ${wallet}")
 

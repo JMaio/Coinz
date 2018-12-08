@@ -25,9 +25,8 @@ class DownloadFileTask(private val url: String, private val filename: String) : 
 
     private fun loadFileFromNetwork(urlString: String): String {
         // Read input from stream, build result as a string
-        var stream: InputStream? = null
         return try {
-            stream = downloadUrl(urlString)
+            val stream = downloadUrl(urlString)
             // buffer stream and return as string
             stream.bufferedReader().use { it.readText() }
         } catch (e: Exception) {

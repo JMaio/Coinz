@@ -327,11 +327,22 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
     private fun collectCoinFromMap(id: String) {
         try {
-            val coin = coinMap!!.coins.find { wildCoin -> wildCoin.properties.id == id }!!
+            val coin = coinMap!!.getCoinByID(id)!! // coinMap!!.coins.find { wildCoin -> wildCoin.properties.id == id }!!
+            info("[collectCoinFromMap] collecting coin $id - $coin")
+            addCoinToWallet(coin)
             collectCoinFromMap(coin)
         } catch (e: Exception) {
-            info("could not collect coin $id")
+            info("[collectCoinFromMap] error collecting $id with error $e")
         }
+    }
+
+    private fun addCoinToWallet(wildCoin: WildCoin) {
+        db.collection("wallets").document(user!!.uid)
+                .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
+                .addOnSuccessListener { info("successfully added coin ${wildCoin.properties.id} to ${user!!.email}'s wallet") }
+                .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to ${user!!.email}'s wallet - $e") }
+
+        info("[addCoinToWallet] method complete")
     }
 
     private fun createOnClickListeners() {

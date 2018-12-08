@@ -78,6 +78,7 @@ data class WildCoin(
 
 @Parcelize
 data class CoinMap(var coins: MutableList<WildCoin>,
+                   var allCoins: List<WildCoin>,
                    var rates: Rates,
                    var features: String): Parcelable, AnkoLogger {
 
@@ -145,23 +146,28 @@ class CoinMapMaker : AnkoLogger {
 
             coinMap = CoinMap(
                     mutableListOf(),
+                    arrayListOf(),
                     gson.fromJson(j.asJsonObject.get("rates"), Rates::class.java),
                     features.toString()
             )
 
 
             info("[loadMapFromFile] : GeoJSON contains ${features.size()} features")
-
+            val tempList =  mutableListOf<WildCoin>()
 
             for (i in 0 until features.size()) {
                 val f = features.get(i).asJsonObject
+                val geometry = gson.fromJson(f.get("geometry").asJsonObject, Geometry::class.java)
                 val props = gson.fromJson(f.get("properties").asJsonObject, Properties::class.java)
                 props.iconOpacity = ceil((props.markerSymbol + 1) / 5.0).toFloat() / 2
-                val geometry = gson.fromJson(f.get("geometry").asJsonObject, Geometry::class.java)
 
-                // don't add this coin if has already been collected!!
-                coinMap.coins.add(WildCoin(props, geometry))
+                // don't add this coin if it has already been collected!!
+                val wildCoin = WildCoin(props, geometry)
+                tempList.add(wildCoin)
+                coinMap.coins.add(wildCoin)
             }
+            // set the map of all coins regardless of collection
+            coinMap.allCoins = tempList
 
             info("[loadMapFromFile] : contains ${coinMap.coins.size} coins")
         } catch (e: FileNotFoundException) {

@@ -1,8 +1,10 @@
 package io.github.jmaio.coinz
 
+//import android.location.LocationListener
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.location.Location
 import android.os.Bundle
 import android.view.Menu
@@ -10,8 +12,11 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.mapbox.android.core.location.LocationEngineListener
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.LocationComponent
@@ -20,40 +25,55 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.style.expressions.Expression.get
+import com.mapbox.mapboxsdk.style.layers.Property.*
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.indefiniteSnackbar
+import org.jetbrains.anko.design.longSnackbar
+import org.jetbrains.anko.design.snackbar
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-class MainActivity : AppCompatActivity(), AnkoLogger {
+class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
-    private lateinit var locationComponent: LocationComponent
-    private var originLocation: Location? = null
+    private var locationComponent: LocationComponent? = null
+    private lateinit var symbolManager: SymbolManager
+    private var shilSource: GeoJsonSource? = null
+    private var dolrSource: GeoJsonSource? = null
+    private var quidSource: GeoJsonSource? = null
+    private var penySource: GeoJsonSource? = null
+    private var geoJsonSources = mutableMapOf<String, GeoJsonSource?>()
 
     private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    private var user: FirebaseUser? = null
+    private val db = FirebaseFirestore.getInstance().apply {
+        firestoreSettings = FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build()
+    }
+    private lateinit var user: FirebaseUser
+    private var wallet = Wallet()
     private var userDisplay = "defaultUser"
 
-    private val CENTRAL_BOUNDS = LatLngBounds.Builder()
+    private val centralBounds = LatLngBounds.Builder()
             .include(LatLng(55.946233, -3.192473))
             .include(LatLng(55.942617, -3.184319))
             .build()
 
-    private val MARKER_SOURCE = "markers-source"
-    private val MARKER_STYLE_LAYER = "markers-style-layer"
-    private val MARKER_IMAGE = "custom-marker"
-
     private var downloadDate = "" // Format: YYYY/MM/DD
-    private val DEBUG_MODE = false
+    private var coinzDebugMode = true
 
     private var coinMap: CoinMap? = null
     private lateinit var coinzmapFile: String
 
-    public lateinit var wallet: Wallet
+    private lateinit var currencies: List<String>
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,8 +87,22 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
         setSupportActionBar(bottom_app_bar)
 
-        user = fbAuth.currentUser
-        if (user?.email != null) userDisplay = user?.email.toString()
+        currencies = listOf(
+                getString(R.string.curr_shil).toLowerCase(),
+                getString(R.string.curr_dolr).toLowerCase(),
+                getString(R.string.curr_quid).toLowerCase(),
+                getString(R.string.curr_peny).toLowerCase()
+        )
+        geoJsonSources = mutableMapOf(
+                Pair(getString(R.string.curr_shil).toLowerCase(), shilSource),
+                Pair(getString(R.string.curr_dolr).toLowerCase(), dolrSource),
+                Pair(getString(R.string.curr_quid).toLowerCase(), quidSource),
+                Pair(getString(R.string.curr_peny).toLowerCase(), penySource)
+        )
+
+
+        user = fbAuth.currentUser!!
+        if (user.email != null) userDisplay = user.email.toString()
 
         createOnClickListeners()
 
@@ -78,23 +112,28 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         mapView?.onCreate(savedInstanceState)
         info("[onCreate] Mapbox object setup complete")
 
-        // asynchronously fetch coin map, then load the map
+        // asynchronously load the map
         mapView?.getMapAsync { mapboxMap ->
             map = mapboxMap.apply {
                 // set map bound and zoom prefs
-                setLatLngBoundsForCameraTarget(CENTRAL_BOUNDS)
-                setOnMarkerClickListener { marker ->
-                    collectCoinFromMap(marker.snippet)
-                    toast("${marker.snippet} collected! coinMap now has ${coinMap?.coins?.size} coins")
-                    true
-                }
-            }
+                setLatLngBoundsForCameraTarget(centralBounds)
 
-            doAsync {
-                fetchCoinMap()
-                // "Map interactions should happen on the UI thread."
-                uiThread {
-                    addMarkers()
+                // add a currency marker layer for each
+                currencies.forEach { c ->
+                    val markerRes = resources.getIdentifier("marker_${c.toLowerCase()}", "drawable", packageName)
+                    val icon = BitmapFactory.decodeResource(resources, markerRes)
+                    addImage("marker_${c.toLowerCase()}", icon)
+                }
+
+                addOnMapClickListener { l ->
+                    val screenPoint = projection.toScreenLocation(l)
+                    val features = queryRenderedFeatures(screenPoint,
+                            "shil_layer", "dolr_layer", "quid_layer", "peny_layer")
+                    if (!features.isEmpty()) {
+                        val selectedFeature = features[0]
+                        val id = selectedFeature.getStringProperty("id")
+                        collectCoinFromMap(id)
+                    }
                 }
             }
 
@@ -106,22 +145,29 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             info("[getMapAsync] created locationComponent")
 
             try {
-                locationComponent.apply {
+                locationComponent!!.apply {
                     info("[getMapAsync] enabling location")
                     activateLocationComponent(this@MainActivity, locationComponentOptions)
                     isLocationComponentEnabled = true
                     renderMode = RenderMode.NORMAL
                     cameraMode = CameraMode.TRACKING
+                    locationEngine?.apply {
+                        requestLocationUpdates()
+                        addLocationEngineListener(this@MainActivity)
+                    }
                 }
-                trackLocation()
-            } catch (e: SecurityException)  {
+            } catch (e: SecurityException) {
                 alert {
                     title = "Please enable location!"
                     message = getString(R.string.location_explanation)
                     isCancelable = false
                 }.show()
+            } catch (e: Exception) {
+                info("location engine definition error: $e")
             }
+
         }
+        doAsync { fetchCoinMap() }
     }
 
 
@@ -175,12 +221,43 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         mapView?.onDestroy()
     }
 
-    fun fetchCoinMap() {
+    @SuppressLint("MissingPermission")
+    override fun onConnected() {
+//        locationComponent.locationEngine?.requestLocationUpdates()
+    }
+
+    override fun onLocationChanged(location: Location?) {
+        val closeCoins = arrayListOf<WildCoin>()
+        coinMap?.coins?.forEach { wildCoin ->
+            if (wildCoin.asLatLng().distanceTo(LatLng(location)) < 25) {
+                closeCoins.add(wildCoin)
+            }
+        }
+        closeCoins.forEach { coin ->
+            collectCoinFromMap(coin)
+        }
+    }
+
+    private fun getWallet(user: FirebaseUser, callback: (Wallet) -> Unit) {
+        db.collection("wallets").document(user.uid).get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val w = task.result!!.toObject(Wallet::class.java)!!
+                        w.setIds()
+                        callback(w)
+                    } else {
+                        info("get failed with ${task.result}")
+                    }
+                }
+    }
+
+    private fun fetchCoinMap() {
+        main_view.longSnackbar("Fetching coin map...")
         val today = LocalDateTime.now()
         val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
-        val maker = CoinMapMaker()
+
         // if map is already today's map
-        if (dateString == downloadDate && !DEBUG_MODE) {
+        if (dateString == downloadDate && !coinzDebugMode) {
             info("[fetchCoinMap]: dateString = $dateString = downloadDate - loading...")
         } else {
             // make url from date pattern
@@ -191,77 +268,91 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
             coinMapDownloader.execute()
         }
-        coinMap = maker.loadMapFromFile(coinzmapFile)
-
-        info("[fetchCoinMap]: map loaded : $coinMap")
-        runOnUiThread {
-            if (coinMap != null && !coinMap!!.isEmpty()) {
-                longToast("Map loaded successfully!")
-                downloadDate = dateString
-            } else {
-                main_view.indefiniteSnackbar("Could not fetch map! Please check your connection.", "retry?") {
-                    fetchCoinMap()
+        getWallet(user) { w ->
+            wallet = w
+            val maker = CoinMapMaker(w)
+            doAsync {
+                coinMap = maker.loadMapFromFile(coinzmapFile)
+                info("[fetchCoinMap]: map loaded : $coinMap")
+                runOnUiThread {
+                    if (coinMap != null) {
+                        main_view.snackbar("Map loaded successfully!")
+                        downloadDate = dateString
+                        addMarkerLayers()
+                    } else {
+                        main_view.indefiniteSnackbar("Could not fetch map! Please check your connection.", "retry?") {
+                            doAsync {
+                                fetchCoinMap()
+                            }
+                        }
+                    }
+                    if (coinMap!!.isEmpty()) {
+                        main_view.indefiniteSnackbar("Looks like you've collected all 50 coins today. Good job!", "Yay!") {}
+                    }
                 }
             }
         }
-
     }
 
-    fun addMarkers() {
+    private fun addMarkerLayers() {
+        info("[addMarkerLayers] map = $map")
+        geoJsonSources.forEach { (curr, _) ->
+            geoJsonSources[curr] = GeoJsonSource("${curr.toLowerCase()}_source", coinMap!!.toGeoJson(curr))
+            map?.addSource(geoJsonSources[curr]!!)
+            val sl = SymbolLayer("${curr.toLowerCase()}_layer", "${curr.toLowerCase()}_source")
+                    .withProperties(
+                            iconImage("marker_${curr.toLowerCase()}"),
+                            iconAnchor(ICON_ANCHOR_CENTER),
+                            iconAllowOverlap(true),
+                            iconOpacity(get("icon-opacity")),
+                            visibility(VISIBLE)
+                    )
+            map?.addLayer(sl)
+        }
+    }
+
+    private fun showMarkers(c: String) {
         info("[addMarkers] map = $map")
-        listOf(
-                getString(R.string.curr_shil),
-                getString(R.string.curr_dolr),
-                getString(R.string.curr_quid),
-                getString(R.string.curr_peny)
-        ).forEach { c ->
-            addMarkers(c)
-        }
-    }
-
-    fun addMarkers(c: String) {
-        info("[addMarkers] adding markers for currency: $c")
-        if (coinMap != null) {
-            for (wildCoin in coinMap!!.coins.filter { coin -> coin.properties.currency == c }) {
-                map?.addMarker(MarkerOptions()
-                        .position(wildCoin.asLatLng())
-                        // store the currency
-                        .title(wildCoin.properties.currency)
-                        // and the id
-                        .snippet(wildCoin.properties.id)
-                )
-            }
-        }
-    }
-    fun removeMarkers() {
-        info("[removeMarkers] map = $map")
-        map?.clear()
-    }
-
-    fun removeMarkers(c: String) {
         info("[removeMarkers] removing markers for currency: $c")
-        map?.markers?.filter { marker ->
-            marker.title == c
-        }?.forEach { marker ->
-            map?.removeMarker(marker)
+        map?.getLayer("${c.toLowerCase()}_layer")?.setProperties(
+                visibility(VISIBLE)
+        )
+    }
+
+    private fun hideMarkers(c: String) {
+        info("[removeMarkers] removing markers for currency: $c")
+        map?.getLayer("${c.toLowerCase()}_layer")?.setProperties(
+                visibility(NONE)
+        )
+    }
+
+    private fun collectCoinFromMap(wildCoin: WildCoin) {
+        val curr = wildCoin.properties.currency.toLowerCase()
+        val source = geoJsonSources[curr]
+        toast("Coin collected!\n(${curr.toUpperCase()} ${wildCoin.properties.value})")
+        coinMap?.collectCoin(wildCoin)
+        source!!.setGeoJson(coinMap?.toGeoJson(curr))
+    }
+
+    private fun collectCoinFromMap(id: String) {
+        try {
+            val coin = coinMap!!.getCoinByID(id)!! // coinMap!!.coins.find { wildCoin -> wildCoin.properties.id == id }!!
+            info("[collectCoinFromMap] collecting coin $id - $coin")
+            addCoinToWallet(coin)
+            collectCoinFromMap(coin)
+        } catch (e: Exception) {
+            info("[collectCoinFromMap] error collecting $id with error $e")
         }
     }
-    fun removeMarkerByID(id: String) {
-        info("[removeMarker] removing markers for currency: $id")
-        map?.markers?.filter { marker ->
-            marker.snippet == id
-        }?.forEach { marker ->
-            map?.removeMarker(marker)
-        }
-    }
 
-    fun collectCoinFromMap(id: String) {
-        coinMap?.collectCoin(id)
-        removeMarkerByID(id)
-    }
+    private fun addCoinToWallet(wildCoin: WildCoin) {
+        // will try to add even if coin is already present
+        db.collection("wallets").document(user.uid)
+                .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
+                .addOnSuccessListener { info("successfully added coin ${wildCoin.properties.id} to ${user.email}'s wallet") }
+                .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to ${user.email}'s wallet - $e") }
 
-    private fun trackLocation() {
-
+        info("[addCoinToWallet] method complete")
     }
 
     private fun createOnClickListeners() {
@@ -270,21 +361,20 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         }
 
         bottom_app_bar.setNavigationOnClickListener {
-            startActivity(Intent(this, BankActivity::class.java).
-                    putExtra("coinMap", coinMap))
+            startActivity(Intent(this, BankActivity::class.java).putExtra("coinMap", coinMap))
         }
 
         val buttons = listOf(button_shil, button_dolr, button_quid, button_peny)
 
         // map markers
         buttons.forEach { btn ->
-            btn.setOnCheckedChangeListener { buttonView, isChecked ->
+            btn.setOnCheckedChangeListener { _, isChecked ->
                 toast("${btn.text} was pressed, now $isChecked")
                 debug("[coinButton] button '$btn' pressed --> $isChecked")
                 if (isChecked) {
-                    addMarkers(btn.text.toString())
+                    showMarkers(btn.text.toString())
                 } else {
-                    removeMarkers(btn.text.toString())
+                    hideMarkers(btn.text.toString())
                 }
             }
         }
@@ -292,11 +382,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         // show user id at the top of the screen
         user_id_chip.apply {
             text = userDisplay
-            setOnClickListener { view ->
+            setOnClickListener {
                 info("[user_id_chip] pressed")
                 alert {
                     title = "Log Out?"
-                    message = "Currently logged in as ${userDisplay}.\nContinue?"
+                    message = "Currently logged in as $userDisplay.\nContinue?"
                     yesButton {
                         fbAuth.signOut()
                         startActivity(Intent(this@MainActivity, LoginActivity::class.java))

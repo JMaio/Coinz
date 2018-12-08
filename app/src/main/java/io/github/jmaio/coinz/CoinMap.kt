@@ -72,7 +72,7 @@ data class WildCoin(
         @SerializedName("geometry") val geometry: Geometry
 ): Parcelable {
     fun asLatLng(): LatLng {
-        return LatLng(geometry.coordinates[0], geometry.coordinates[1])
+        return LatLng(geometry.coordinates[1], geometry.coordinates[0])
     }
 }
 

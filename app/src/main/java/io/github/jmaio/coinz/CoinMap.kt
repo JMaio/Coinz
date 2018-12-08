@@ -74,6 +74,11 @@ data class WildCoin(
     fun asLatLng(): LatLng {
         return LatLng(geometry.coordinates[1], geometry.coordinates[0])
     }
+    fun toCoin(): Coin {
+        properties.let { p ->
+            return Coin(p.id, p.currency, p.value)
+        }
+    }
 }
 
 @Parcelize

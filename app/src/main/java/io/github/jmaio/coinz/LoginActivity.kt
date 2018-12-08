@@ -126,16 +126,14 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     private fun createFireBaseWallet(uid: String) {
         // and create a wallet
         val wallet = HashMap<String, Any>()
-        wallet["userUID"] = uid
         wallet["coins"] = emptyList<Coin>()
         wallet["gold"] = 0.0
         info("[createFireBaseWallet] entered create method + set wallet val")
 
         // Add a new document with a generated ID
         db.collection("wallets")
-                .add(wallet)
-                .addOnSuccessListener { documentReference ->
-                    info("[createFireBaseWallet] DocumentSnapshot added with ID: ${documentReference.id}")
+                .document(uid).set(wallet)
+                .addOnSuccessListener { info("[createFireBaseWallet] DocumentSnapshot added with ID: $uid")
                 }
                 .addOnFailureListener { e ->
                     info("[createFireBaseWallet] Error adding document: $e")

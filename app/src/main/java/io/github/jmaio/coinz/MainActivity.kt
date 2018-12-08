@@ -63,7 +63,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
     }
-    private var user: FirebaseUser? = null
+    private lateinit var user: FirebaseUser
+    private var wallet = Wallet()
     private var userDisplay = "defaultUser"
 
     private val centralBounds = LatLngBounds.Builder()
@@ -105,8 +106,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         )
 
 
-        user = fbAuth.currentUser
-        if (user?.email != null) userDisplay = user?.email.toString()
+        user = fbAuth.currentUser!!
+        if (user.email != null) userDisplay = user.email.toString()
 
         createOnClickListeners()
 
@@ -141,8 +142,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
                 }
             }
 
-            doAsync { fetchCoinMap() }
-
             val locationComponentOptions = LocationComponentOptions.builder(this)
                     .minZoom(14.5)
                     .maxZoom(18.0)
@@ -173,6 +172,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
             }
 
         }
+        doAsync { fetchCoinMap() }
     }
 
 
@@ -243,11 +243,24 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         }
     }
 
+    private fun getWallet(user: FirebaseUser, callback: (Wallet) -> Unit) {
+        db.collection("wallets").document(user.uid).get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val w = task.result!!.toObject(Wallet::class.java)!!
+                        w.setIds()
+                        callback(w)
+                    } else {
+                        info("get failed with ${task.result}")
+                    }
+                }
+    }
+
     private fun fetchCoinMap() {
         main_view.longSnackbar("Fetching coin map...")
         val today = LocalDateTime.now()
         val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
-        val maker = CoinMapMaker()
+
         // if map is already today's map
         if (dateString == downloadDate && !coinzDebugMode) {
             info("[fetchCoinMap]: dateString = $dateString = downloadDate - loading...")
@@ -260,23 +273,30 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
             val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
             coinMapDownloader.execute()
         }
-        coinMap = maker.loadMapFromFile(coinzmapFile)
-
-        info("[fetchCoinMap]: map loaded : $coinMap")
-        runOnUiThread {
-            if (coinMap != null && !coinMap!!.isEmpty()) {
-                longToast("Map loaded successfully!")
-                downloadDate = dateString
-                addMarkerLayers()
-            } else {
-                main_view.indefiniteSnackbar("Could not fetch map! Please check your connection.", "retry?") {
-                    doAsync {
-                        fetchCoinMap()
+        getWallet(user) { w ->
+            wallet = w
+            val maker = CoinMapMaker(w)
+            doAsync {
+                coinMap = maker.loadMapFromFile(coinzmapFile)
+                info("[fetchCoinMap]: map loaded : $coinMap")
+                runOnUiThread {
+                    if (coinMap != null) {
+                        main_view.snackbar("Map loaded successfully!")
+                        downloadDate = dateString
+                        addMarkerLayers()
+                    } else {
+                        main_view.indefiniteSnackbar("Could not fetch map! Please check your connection.", "retry?") {
+                            doAsync {
+                                fetchCoinMap()
+                            }
+                        }
+                    }
+                    if (coinMap!!.isEmpty()) {
+                        main_view.indefiniteSnackbar("Looks like you've collected all 50 coins today. Good job!", "Yay!") {}
                     }
                 }
             }
         }
-
     }
 
     private fun addMarkerLayers() {
@@ -345,7 +365,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     }
 
     private fun addCoinToWallet(wildCoin: WildCoin) {
-        db.collection("wallets").document(user!!.uid)
+        // will try to add even if coin is already present
+        db.collection("wallets").document(user.uid)
                 .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
                 .addOnSuccessListener { info("successfully added coin ${wildCoin.properties.id} to ${user!!.email}'s wallet") }
                 .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to ${user!!.email}'s wallet - $e") }

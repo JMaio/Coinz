@@ -1,34 +1,20 @@
 package io.github.jmaio.coinz
 
-import android.location.Location
-import android.os.Parcel
 import android.os.Parcelable
-import android.provider.CallLog
 import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
-import com.google.gson.stream.JsonWriter
-import com.google.protobuf.Internal
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.GeoJson
-import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.lang.Exception
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.ceil
 
@@ -80,7 +66,6 @@ data class WildCoin(
         }
     }
 }
-
 @Parcelize
 data class CoinMap(var coins: MutableList<WildCoin>,
                    var allCoins: List<WildCoin>,
@@ -138,8 +123,9 @@ data class CoinMap(var coins: MutableList<WildCoin>,
     }
 }
 
+
 // class to keep maps of coins per day
-class CoinMapMaker : AnkoLogger {
+class CoinMapMaker(var wallet: Wallet) : AnkoLogger {
     private val gson = Gson()
 
     fun loadMapFromFile(file: String): CoinMap? {
@@ -165,7 +151,9 @@ class CoinMapMaker : AnkoLogger {
 
 
             info("[loadMapFromFile] : GeoJSON contains ${features.size()} features")
-            val tempList =  mutableListOf<WildCoin>()
+            val allCoins =  mutableListOf<WildCoin>()
+//            val collectedCoins = db
+            info("wallet ids: ${wallet}")
 
             for (i in 0 until features.size()) {
                 val f = features.get(i).asJsonObject
@@ -173,13 +161,16 @@ class CoinMapMaker : AnkoLogger {
                 val props = gson.fromJson(f.get("properties").asJsonObject, Properties::class.java)
                 props.iconOpacity = ceil((props.markerSymbol + 1) / 5.0).toFloat() / 2
 
-                // don't add this coin if it has already been collected!!
                 val wildCoin = WildCoin(props, geometry)
-                tempList.add(wildCoin)
-                coinMap.coins.add(wildCoin)
+                allCoins.add(wildCoin)
+                // don't add this coin if it has already been collected!!
+//                info("[coinMap] adding ${wildCoin.properties.id}")
+                if (wildCoin.properties.id !in wallet.ids) {
+                    coinMap.coins.add(wildCoin)
+                }
             }
             // set the map of all coins regardless of collection
-            coinMap.allCoins = tempList
+            coinMap.allCoins = allCoins
 
             info("[loadMapFromFile] : contains ${coinMap.coins.size} coins")
         } catch (e: FileNotFoundException) {

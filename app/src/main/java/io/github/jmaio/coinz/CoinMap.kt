@@ -111,6 +111,13 @@ data class CoinMap(var coins: MutableList<WildCoin>,
         return coins.isEmpty()
     }
 
+    fun getCoinByID(uid: String): WildCoin? = try {
+        allCoins.find { coin -> coin.properties.id == uid }
+    } catch (e: Exception) {
+        info("[getCoinByID] error: $e")
+        null
+    }
+
     fun toGeoJson(c: String): FeatureCollection {
 //        updateFeatures()
         val currCoins = Gson().toJson(coins.filter { coin -> coin.properties.currency.toLowerCase() == c })

@@ -71,8 +71,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
     private lateinit var currencies: List<String>
 
-//    public lateinit var wallet: Wallet
-
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -226,7 +224,15 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     }
 
     override fun onLocationChanged(location: Location?) {
-        toast("location changed OMG!")
+        val closeCoins = arrayListOf<WildCoin>()
+        coinMap?.coins?.forEach { wildCoin ->
+            if (wildCoin.asLatLng().distanceTo(LatLng(location)) < 25) {
+                closeCoins.add(wildCoin)
+            }
+        }
+        closeCoins.forEach { coin ->
+            collectCoinFromMap(coin)
+        }
     }
 
     private fun fetchCoinMap() {
@@ -304,19 +310,12 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
     private fun removeMarkerByID(id: String) {
         info("[removeMarker] removing markers for coin id: $id")
-//        map?.layers?.forEach {
-//            it.id
-//        }
         map?.markers?.filter { marker ->
             marker.snippet == id
         }?.forEach { marker ->
             map?.removeMarker(marker)
         }
     }
-
-//    fun updateMapLayer(layerName: String, layer: SymbolLayer) {
-//        map?.layers?.set(map?.layers!!.indexOf(map?.getLayer(layerName)), layer)
-//    }
 
     private fun collectCoinFromMap(wildCoin: WildCoin) {
         val curr = wildCoin.properties.currency.toLowerCase()

@@ -27,6 +27,7 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.ceil
@@ -80,21 +81,23 @@ data class CoinMap(var coins: MutableList<WildCoin>,
                    var rates: Rates,
                    var features: String): Parcelable, AnkoLogger {
 
-    fun collectCoin(id: String) {
+    fun collectCoin(wildCoin: WildCoin) {
         // find the coin by id
-        val wildCoin = coins.find { coin ->
-            coin.properties.id == id
-        }
-        if (wildCoin != null) {
-            val collectedCoin = Coin(
-                    wildCoin.properties.id,
-                    wildCoin.properties.currency,
-                    wildCoin.properties.value
-            )
+//        val wildCoin = coins.find { coin ->
+//            coin.properties.id == id
+//        }
+        val collectedCoin = Coin(
+                wildCoin.properties.id,
+                wildCoin.properties.currency,
+                wildCoin.properties.value
+        )
             // add to firebase wallet as collected
             //
-
+        try {
             coins.remove(wildCoin)
+            info("removed coin $wildCoin")
+        } catch (e: Exception) {
+            info("could not collect coin ${wildCoin.properties.id}")
         }
     }
 
@@ -102,21 +105,23 @@ data class CoinMap(var coins: MutableList<WildCoin>,
         return coins.isEmpty()
     }
 
-    fun toGeoJson(c: String): GeoJsonSource {
+    fun toGeoJson(c: String): FeatureCollection {
 //        updateFeatures()
-        val currCoins = Gson().toJson(coins.filter { coin -> coin.properties.currency == c })
+        val currCoins = Gson().toJson(coins.filter { coin -> coin.properties.currency.toLowerCase() == c })
 
         val featureCollection = ArrayList<Feature>()
         JsonParser().parse(currCoins).asJsonArray.forEach { f ->
             f.asJsonObject.addProperty("type", "Feature")
-            info("feature $f")
             featureCollection.add(Feature.fromJson(f.toString()))
         }
+        info("new $c map: (${featureCollection.size}) $featureCollection")
 
-        return GeoJsonSource(
-                "${c.toLowerCase()}_source",
-                FeatureCollection.fromFeatures(featureCollection)
-        )
+        return FeatureCollection.fromFeatures(featureCollection)
+
+//        return GeoJsonSource(
+//                "${c.toLowerCase()}_source",
+//                FeatureCollection.fromFeatures(featureCollection)
+//        )
     }
 }
 

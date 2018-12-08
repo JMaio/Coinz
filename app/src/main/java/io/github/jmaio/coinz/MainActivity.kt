@@ -12,6 +12,9 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
 import com.mapbox.mapboxsdk.Mapbox
@@ -55,6 +58,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     private var geoJsonSources = mutableMapOf<String, GeoJsonSource?>()
 
     private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance().apply {
+        firestoreSettings = FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build()
+    }
     private var user: FirebaseUser? = null
     private var userDisplay = "defaultUser"
 

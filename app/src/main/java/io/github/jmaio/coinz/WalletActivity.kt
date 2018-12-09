@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_wallet.*
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.padding
+import org.jetbrains.anko.*
+import org.jetbrains.anko.sdk25.coroutines.onClick
 
 class WalletActivity : AppCompatActivity(), AnkoLogger {
 
@@ -57,6 +58,8 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
 
     }
 
+    fun sendCoin(receiverID: String) {
+
     class WalletAdapter(private val wallet: Wallet) :
             RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
 
@@ -65,13 +68,19 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
         // you provide access to all the views for a data item in a view holder.
         // Each data item is just a string in this case that is shown in a TextView.
         class WalletViewHolder(val view: View,
+//                               val listener: (View) -> Unit,
                                val curr: TextView = view.findViewById(R.id.wallet_curr_text),
                                val currUnits: TextView = view.findViewById(R.id.wallet_curr_units),
-                               val currDec: TextView = view.findViewById(R.id.wallet_curr_dec)
-        ) : RecyclerView.ViewHolder(view), AnkoLogger {
-//        val curr = R.id.wallet_curr_text
-//        val currUnits = R.id.wallet_curr_units
-//        val currDec = R.id.wallet_curr_dec
+                               val currDec: TextView = view.findViewById(R.id.wallet_curr_dec),
+                               val button: ImageButton = view.findViewById(R.id.wallet_button_send)
+        ) : RecyclerView.ViewHolder(view), AnkoLogger, View.OnClickListener {
+            init {
+                button.setOnClickListener(this)
+            }
+
+            override fun onClick(v: View?) {
+                v?.context?.toast("hello")
+            }
         }
 
 
@@ -105,6 +114,24 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                 coin.value.toString().split('.').let { (u, d) ->
                     currUnits.text = u
                     currDec.text = d.take(6)
+                }
+                button.setOnClickListener { v ->
+                    v.context.alert {
+                        title = "Sending coin"
+                        message = "Please specify the wallet of the receiver below:"
+                        customView {
+                            linearLayout {
+                                val receiver = editText {
+                                    hint = "Receiver ID"
+                                }.lparams(width = matchParent)
+                                button("Send") {
+                                    onClick {
+                                        ctx.toast("sending coin")
+                                    }
+                                }.lparams(width = wrapContent)
+                            }
+                        }
+                    }.show()
                 }
             }
         }

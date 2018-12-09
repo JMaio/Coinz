@@ -82,9 +82,6 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             val itemView = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_wallet, parent, false) as View
             // set the view's size, margins, paddings and layout parameters
-            itemView.padding = 20
-//        val p = 30
-//        itemView.setContentPadding(p, p, p, p)
 
             return WalletViewHolder(itemView)
         }

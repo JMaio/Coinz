@@ -357,7 +357,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
     private fun createOnClickListeners() {
         fab.setOnClickListener {
-            startActivity(Intent(this, WalletActivity::class.java))
+            getWallet(user) { w ->
+                wallet = w
+                startActivity(Intent(this, WalletActivity::class.java).putExtra("wallet", wallet))
+            }
         }
 
         bottom_app_bar.setNavigationOnClickListener {

@@ -8,6 +8,8 @@
     android:layout_marginTop="6dp"
     android:layout_marginRight="6dp"
     android:layout_weight="1"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"
     app:cardElevation="2dp"
     app:contentPadding="8dp"
     app:contentPaddingLeft="32dp"

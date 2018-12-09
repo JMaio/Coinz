@@ -35,8 +35,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             wallet_day_progressbar.progress = (p * 2)
 
             wallet.gold.toString().split('.').let { (u, d) ->
-                gold_chip.text = getString(R.string.value_display, u, d)
-                //"$u.${d.take(3)}"
+                gold_chip.text = getString(R.string.value_display, u, d.take(6))
             }
         }
 

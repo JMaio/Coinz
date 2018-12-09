@@ -24,16 +24,19 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet)
 
-        wallet = intent.extras!!.getParcelable("wallet")!!
+        val w: Wallet? = intent.extras?.getParcelable("wallet")
+        if (w != null) {
+            wallet = w
 
-        // set progress
-        val p = wallet.coins.size
-        wallet_progress_text.text = getString(R.string.coins_collected_progress, p)
-        wallet_day_progressbar.progress = (p * 2)
+            // set progress
+            val p = wallet.coins.size
+            wallet_progress_text.text = getString(R.string.coins_collected_progress, p)
+            wallet_day_progressbar.progress = (p * 2)
 
-        wallet.gold.toString().split('.').let { (u, d) ->
-            gold_chip.text = getString(R.string.value_display, u, d)
-                    //"$u.${d.take(3)}"
+            wallet.gold.toString().split('.').let { (u, d) ->
+                gold_chip.text = getString(R.string.value_display, u, d)
+                //"$u.${d.take(3)}"
+            }
         }
 
 
@@ -100,7 +103,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             holder.apply {
                 curr.apply {
                     text = coin.currency
-                    setCompoundDrawablesWithIntrinsicBounds( 0, drawables[coin.currency!!.toLowerCase()]!!,0, 0)
+                    setCompoundDrawablesWithIntrinsicBounds(0, drawables[coin.currency!!.toLowerCase()]!!, 0, 0)
                 }
                 coin.value.toString().split('.').let { (u, d) ->
                     currUnits.text = u

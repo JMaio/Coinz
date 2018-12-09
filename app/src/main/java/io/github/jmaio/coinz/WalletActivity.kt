@@ -18,11 +18,13 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
 
+    private lateinit var wallet: Wallet
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet)
 
-        val wallet = intent.getParcelableExtra<Wallet>("wallet")
+        wallet = intent.extras!!.getParcelable("wallet")!!
 
         // set progress
         val p = wallet.coins.size

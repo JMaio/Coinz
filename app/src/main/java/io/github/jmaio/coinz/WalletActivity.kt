@@ -1,6 +1,8 @@
 package io.github.jmaio.coinz
 
 import android.os.Bundle
+import android.text.Layout
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_wallet.*
 import org.jetbrains.anko.*
-import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class WalletActivity : AppCompatActivity(), AnkoLogger {
 
@@ -39,7 +41,6 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             }
         }
 
-
         viewManager = LinearLayoutManager(this)
         viewAdapter = WalletAdapter(wallet)
 
@@ -53,11 +54,11 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
 
             // specify an viewAdapter (see also next example)
             adapter = viewAdapter
+
+            // add click listeners?
         }
 
     }
-
-    fun sendCoin(receiverID: String) {
 
     class WalletAdapter(private val wallet: Wallet) :
             RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
@@ -91,6 +92,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                     .inflate(R.layout.item_wallet, parent, false) as View
             // set the view's size, margins, paddings and layout parameters
 
+
             return WalletViewHolder(itemView)
         }
 
@@ -116,18 +118,25 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                 }
                 button.setOnClickListener { v ->
                     v.context.alert {
-                        title = "Sending coin"
+                        title = "Sending ${coin.currency} (${coin.value.toString().take(8)})"
                         message = "Please specify the wallet of the receiver below:"
                         customView {
-                            linearLayout {
+                            verticalLayout {
                                 val receiver = editText {
                                     hint = "Receiver ID"
-                                }.lparams(width = matchParent)
+                                }.lparams {
+                                    width = matchParent
+                                    horizontalPadding = dip(32)
+                                }
                                 button("Send") {
                                     onClick {
-                                        ctx.toast("sending coin")
+                                        wallet.donateCoin(coin.id!!, receiver.text.toString())
+                                        ctx.toast("sending coin to ${receiver.text}")
                                     }
-                                }.lparams(width = wrapContent)
+                                }.lparams {
+                                    width = wrapContent
+                                    gravity = Gravity.CENTER
+                                }
                             }
                         }
                     }.show()

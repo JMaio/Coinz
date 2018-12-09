@@ -25,7 +25,6 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.style.expressions.Expression.get
 import com.mapbox.mapboxsdk.style.layers.Property.*
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
@@ -45,19 +44,14 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
     private var locationComponent: LocationComponent? = null
-    private lateinit var symbolManager: SymbolManager
     private var shilSource: GeoJsonSource? = null
     private var dolrSource: GeoJsonSource? = null
     private var quidSource: GeoJsonSource? = null
     private var penySource: GeoJsonSource? = null
     private var geoJsonSources = mutableMapOf<String, GeoJsonSource?>()
 
-    private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance().apply {
-        firestoreSettings = FirebaseFirestoreSettings.Builder()
-                .setTimestampsInSnapshotsEnabled(true)
-                .build()
-    }
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
     private lateinit var user: FirebaseUser
     private var wallet = Wallet()
     private var userDisplay = "defaultUser"
@@ -78,7 +72,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance().apply {
+            firestoreSettings = FirebaseFirestoreSettings.Builder()
+                    .setTimestampsInSnapshotsEnabled(true)
+                    .build()
+        }
         // Mapbox access token is configured here. This needs to be called either in your application
         // object or in the same activity which contains the mapview.
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
@@ -99,10 +99,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
                 Pair(getString(R.string.curr_quid).toLowerCase(), quidSource),
                 Pair(getString(R.string.curr_peny).toLowerCase(), penySource)
         )
-
-
-        user = fbAuth.currentUser!!
-        if (user.email != null) userDisplay = user.email.toString()
 
         createOnClickListeners()
 
@@ -176,14 +172,24 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     override fun onStart() {
         super.onStart()
 
-        val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
-        // use ”” as the default value (this might be the first time the app is run)
-        downloadDate = settings.getString("lastDownloadDate", "")
-        info("[onStart] last map load date = '$downloadDate'")
+        // set currently signed-in user and display it
+        auth.currentUser.let { u ->
+            if (u != null)
+            user = u
+            u?.email.let { e ->
+                if (e != null)
+                    userDisplay = e
+                user_id_chip.text = e
+            }
+        }
 
-        mapView?.onStart()
+            val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
+            // use ”” as the default value (this might be the first time the app is run)
+            downloadDate = settings.getString("lastDownloadDate", "")
+            info("[onStart] last map load date = '$downloadDate'")
 
-    }
+            mapView?.onStart()
+        }
 
     override fun onResume() {
         super.onResume()
@@ -239,7 +245,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     }
 
     private fun getWallet(user: FirebaseUser, callback: (Wallet) -> Unit) {
-        db.collection("wallets").document(user.uid).get()
+        db.collection("wallets").document(user.email!!).get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val w = task.result!!.toObject(Wallet::class.java)!!
@@ -347,7 +353,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
     private fun addCoinToWallet(wildCoin: WildCoin) {
         // will try to add even if coin is already present
-        db.collection("wallets").document(user.uid)
+        db.collection("wallets").document(user.email!!)
                 .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
                 .addOnSuccessListener { info("successfully added coin ${wildCoin.properties.id} to ${user.email}'s wallet") }
                 .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to ${user.email}'s wallet - $e") }
@@ -364,7 +370,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         }
 
         bottom_app_bar.setNavigationOnClickListener {
-            startActivity(Intent(this, BankActivity::class.java).putExtra("coinMap", coinMap))
+            getWallet(user) { w ->
+                wallet = w
+                startActivity(Intent(this, BankActivity::class.java).putExtra("wallet", wallet))
+            }
         }
 
         val buttons = listOf(button_shil, button_dolr, button_quid, button_peny)
@@ -384,14 +393,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
         // show user id at the top of the screen
         user_id_chip.apply {
-            text = userDisplay
             setOnClickListener {
                 info("[user_id_chip] pressed")
                 alert {
                     title = "Log Out?"
                     message = "Currently logged in as $userDisplay.\nContinue?"
                     yesButton {
-                        fbAuth.signOut()
+                        auth.signOut()
                         startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                         this@MainActivity.finish()
                     }

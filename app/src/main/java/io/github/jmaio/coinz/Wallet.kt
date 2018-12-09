@@ -42,7 +42,7 @@ data class Wallet(
     }
 
     // transfer a coin to another player
-    fun donateCoin(coin: Coin, wallet: Wallet) {
+    fun donateCoin(coinID: String, walletID: String) {
 
     }
 

@@ -54,29 +54,6 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
 
     }
 
-    fun makeCoinCardView(coin: Coin): CardView {
-        val cardView = CardView(this).apply {
-            addView(LinearLayout(this@WalletActivity).apply {
-                addView(ImageView(this@WalletActivity).apply {
-                    imageResource = resources.getIdentifier("marker_${coin.currency!!.toLowerCase()}", "drawable", packageName)
-                })
-                addView(TextView(this@WalletActivity).apply {
-                    text = "hello"
-                })
-            })
-//                minimumHeight = dip(50)
-            dip(16).let { d -> setContentPadding(d, d, d, d) }
-        }
-        val layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            topMargin = dip(6)
-        }
-        cardView.layoutParams = layoutParams
-        return cardView
-    }
-
     class WalletAdapter(private val wallet: Wallet) :
             RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
 

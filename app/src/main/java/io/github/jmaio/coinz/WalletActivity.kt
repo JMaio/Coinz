@@ -1,22 +1,16 @@
 package io.github.jmaio.coinz
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.menu.MenuView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_wallet.*
-import kotlinx.android.synthetic.main.item_bank.*
-import org.jetbrains.anko.*
-import org.w3c.dom.Text
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.padding
 
 class WalletActivity : AppCompatActivity(), AnkoLogger {
 

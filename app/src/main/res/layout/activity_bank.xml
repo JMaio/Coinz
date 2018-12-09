@@ -74,6 +74,11 @@
                     android:gravity="center_horizontal"
                     android:orientation="horizontal">
 
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/ic_monetization_on_24dp" />
+
                     <TextView
                         android:id="@+id/shil_curr_value_units"
                         android:layout_width="wrap_content"
@@ -135,6 +140,11 @@
                     android:layout_gravity="center_horizontal"
                     android:gravity="center_horizontal"
                     android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/ic_monetization_on_24dp" />
 
                     <TextView
                         android:id="@+id/dolr_curr_value_units"
@@ -198,6 +208,11 @@
                     android:gravity="center_horizontal"
                     android:orientation="horizontal">
 
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/ic_monetization_on_24dp" />
+
                     <TextView
                         android:id="@+id/quid_curr_value_units"
                         android:layout_width="wrap_content"
@@ -259,6 +274,11 @@
                     android:layout_gravity="center_horizontal"
                     android:gravity="center_horizontal"
                     android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/ic_monetization_on_24dp" />
 
                     <TextView
                         android:id="@+id/peny_curr_value_units"

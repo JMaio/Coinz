@@ -42,6 +42,14 @@ data class Wallet(
 
     }
 
+    private fun addGold(amount: Double) {
+        if (id != null)
+        walletCollection.document(id)
+                .update("gold", gold + amount)
+                .addOnSuccessListener { info("successfully added $amount gold to $id's wallet") }
+                .addOnFailureListener { e -> info("could not add $amount gold to  $id's wallet - $e") }
+    }
+
     // collect or earn coin from another player
     fun addCoinToWallet(wildCoin: WildCoin) {
         // will try to add even if coin is already present

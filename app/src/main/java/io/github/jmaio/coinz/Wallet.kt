@@ -13,7 +13,8 @@ data class Wallet(
         val gold: Double,
         val coins: MutableList<Coin>,
         var ids: MutableSet<String>,
-        val ordered: MutableList<Coin>
+        val ordered: MutableList<Coin>,
+        val bankedToday: Int
 ) : Parcelable, AnkoLogger {
 
     constructor() : this(null, 0.0, mutableListOf(), mutableSetOf(), mutableListOf(), 0)

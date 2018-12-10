@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     private lateinit var db: FirebaseFirestore
     private lateinit var user: FirebaseUser
     private var wallet = Wallet()
+    private var walletStore = WalletStore()
     private var userDisplay = "defaultUser"
 
     private val centralBounds = LatLngBounds.Builder()
@@ -244,19 +245,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         }
     }
 
-    private fun getWallet(user: FirebaseUser, callback: (Wallet) -> Unit) {
-        db.collection("wallets").document(user.email!!).get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val w = task.result!!.toObject(Wallet::class.java)!!
-                        w.setIds()
-                        callback(w)
-                    } else {
-                        info("get failed with ${task.result}")
-                    }
-                }
-    }
-
     private fun fetchCoinMap() {
         main_view.longSnackbar("Fetching coin map...")
         val today = LocalDateTime.now()
@@ -274,7 +262,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
             val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
             coinMapDownloader.execute()
         }
-        getWallet(user) { w ->
+        walletStore.getWallet(user) { w ->
             wallet = w
             val maker = CoinMapMaker(w)
             doAsync {
@@ -363,14 +351,14 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
     private fun createOnClickListeners() {
         fab.setOnClickListener {
-            getWallet(user) { w ->
+            walletStore.getWallet(user) { w ->
                 wallet = w
                 startActivity(Intent(this, WalletActivity::class.java).putExtra("wallet", wallet))
             }
         }
 
         bottom_app_bar.setNavigationOnClickListener {
-            getWallet(user) { w ->
+            walletStore.getWallet(user) { w ->
                 wallet = w
                 startActivity(Intent(this, BankActivity::class.java).putExtra("wallet", wallet))
             }

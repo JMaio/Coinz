@@ -68,19 +68,24 @@ data class Wallet(
     }
 
     // transfer a coin to another player
-    fun donateCoin(coinID: String, walletID: String): Boolean {
+    fun donateCoin(coinID: String, walletID: String, rates: Rates): Double {
+        var g = .0
         val coin = coins.find { c ->
             c.id == coinID
         }
         info("[donateCoin] coin is ${coin?.value}, ${coin?.currency}")
         if (coin != null && !coin.gone) {
+            val rate = rates.toMap()[coin.currency]!!
             // coin is in the wallet
             walletStore.getWallet(walletID) { w ->
-                if (w == null) throw Exception("Wallet not found!") // wallet not found
-                w.gold
+                if (w == null) throw Exception("Receiver wallet not found!") // wallet not found
+                if (w == this) throw Exception("You can't send a coin to yourself!")
+                g = coin.value!! * rate
+                removeCoinFromWallet(coin)
+                w.addGold(g) //coin.currency)
             }
-        } else throw Exception("You don't have this coin!")
-        return false
+        } else throw Exception("You don't have this coin anymore!")
+        return g
     }
 
 }

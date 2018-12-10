@@ -124,6 +124,8 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     private fun createFireBaseWallet(email: String) {
         // and create a wallet
         val wallet = HashMap<String, Any>()
+        wallet["id"] = email
+        wallet["bankedToday"] = 0
         wallet["coins"] = emptyList<Coin>()
         wallet["gold"] = 0.0
         info("[createFireBaseWallet] entered create method + set wallet val")

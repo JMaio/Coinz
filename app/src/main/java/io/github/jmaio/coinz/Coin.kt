@@ -7,7 +7,8 @@ import kotlinx.android.parcel.Parcelize
 data class Coin(
         val id: String?,
         val currency: String?,
-        val value: Double?
+        val value: Double?,
+        var gone: Boolean = false
 ) : Parcelable {
     constructor() : this("", "", .0)
 
@@ -15,7 +16,8 @@ data class Coin(
         return hashMapOf(
                 Pair("id", id),
                 Pair("currency", currency),
-                Pair("value", value)
+                Pair("value", value),
+                Pair("gone", gone)
         )
     }
 }

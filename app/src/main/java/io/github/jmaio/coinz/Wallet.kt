@@ -23,11 +23,7 @@ data class Wallet(
     @IgnoredOnParcel
     private val walletStore = WalletStore()
     @IgnoredOnParcel
-    private var id = "defaultWallet"
-
-    fun setID(id: String) {
-        this.id = id
-    }
+    private val walletCollection = walletStore.db.collection("wallets")
 
     fun init() {
         this.apply {

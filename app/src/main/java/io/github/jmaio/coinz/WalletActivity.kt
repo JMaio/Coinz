@@ -130,7 +130,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                                 }
                                 button("Send") {
                                     onClick {
-                                        wallet.donateCoin(coin.id!!, receiver.text.toString())
+                                        if (wallet.donateCoin(coin.id!!, receiver.text.toString()))
                                         ctx.toast("sending coin to ${receiver.text}")
                                     }
                                 }.lparams {

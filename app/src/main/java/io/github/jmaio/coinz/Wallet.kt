@@ -1,8 +1,11 @@
 package io.github.jmaio.coinz
 
 import android.os.Parcelable
+import com.google.firebase.firestore.FieldValue
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 @Parcelize
 data class Wallet(
@@ -13,6 +16,15 @@ data class Wallet(
 ) : Parcelable, AnkoLogger {
 
     constructor() : this(0.0, mutableListOf(), mutableSetOf(), mutableListOf())
+
+    @IgnoredOnParcel
+    private val walletStore = WalletStore()
+    @IgnoredOnParcel
+    private var id = "defaultWallet"
+
+    fun setID(id: String) {
+        this.id = id
+    }
 
     fun init() {
         this.apply {
@@ -32,8 +44,14 @@ data class Wallet(
     }
 
     // collect or earn coin from another player
-    fun getCoin(coin: Coin) {
+    fun addCoinToWallet(wildCoin: WildCoin) {
+        // will try to add even if coin is already present
+        walletStore.db.collection("wallets").document(id)
+                .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
+                .addOnSuccessListener { info("successfully added coin ${wildCoin.properties.id} to $id's wallet") }
+                .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to $id's wallet - $e") }
 
+        info("[addCoinToWallet] method complete")
     }
 
     // exchange a coin for its gold value
@@ -42,8 +60,19 @@ data class Wallet(
     }
 
     // transfer a coin to another player
-    fun donateCoin(coinID: String, walletID: String) {
-
+    fun donateCoin(coinID: String, walletID: String): Boolean {
+        val coin = coins.find { c ->
+            c.id == coinID
+        }
+        info("[donateCoin] coin is ${coin?.value}, ${coin?.currency}")
+        if (coin != null && !coin.gone) {
+            // coin is in the wallet
+            walletStore.getWallet(walletID) { w ->
+                if (w == null) throw Exception("Wallet not found!") // wallet not found
+                w.gold
+            }
+        } else throw Exception("You don't have this coin!")
+        return false
     }
 
 }

@@ -9,13 +9,15 @@ import org.jetbrains.anko.info
 
 @Parcelize
 data class Wallet(
+        val id: String?,
         val gold: Double,
         val coins: MutableList<Coin>,
         var ids: MutableSet<String>,
         val ordered: MutableList<Coin>
 ) : Parcelable, AnkoLogger {
 
-    constructor() : this(0.0, mutableListOf(), mutableSetOf(), mutableListOf())
+    constructor() : this(null, 0.0, mutableListOf(), mutableSetOf(), mutableListOf(), 0)
+    constructor(id: String?, w: Wallet) : this(id, w.gold, w.coins, w.ids, w.ordered, w.bankedToday)
 
     @IgnoredOnParcel
     private val walletStore = WalletStore()

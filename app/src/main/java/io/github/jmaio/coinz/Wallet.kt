@@ -53,7 +53,8 @@ data class Wallet(
     // collect or earn coin from another player
     fun addCoinToWallet(wildCoin: WildCoin) {
         // will try to add even if coin is already present
-        walletStore.db.collection("wallets").document(id)
+        if (id != null)
+        walletCollection.document(id)
                 .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
                 .addOnSuccessListener { info("successfully added coin ${wildCoin.properties.id} to $id's wallet") }
                 .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to $id's wallet - $e") }

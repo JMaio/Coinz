@@ -2,6 +2,7 @@ package io.github.jmaio.coinz
 
 import android.os.Parcelable
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
@@ -62,16 +63,18 @@ data class Wallet(
     // collect coin from map
     fun addCoinToWallet(wildCoin: WildCoin) {
         // will try to add even if coin is already present
-        if (id != null)
+        if (id != null) {
+            val coins = HashMap<String, Any?>()
+            coins["coins"] = wildCoin.toCoin().toMap()
             walletCollection.document(id)
-                    .collection("coins")
-                    .document(wildCoin.properties.id)
-                    .set(wildCoin.toCoin().toMap())
+                    .set(coins, SetOptions.merge())
 //                    .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
                     .addOnSuccessListener {
                         coins[wildCoin.properties.id] = wildCoin.toCoin()
-                        info("successfully added coin ${wildCoin.properties.id} to $id's wallet") }
+                        info("successfully added coin ${wildCoin.properties.id} to $id's wallet")
+                    }
                     .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to $id's wallet - $e") }
+        }
         info("[addCoinToWallet] method complete")
     }
 

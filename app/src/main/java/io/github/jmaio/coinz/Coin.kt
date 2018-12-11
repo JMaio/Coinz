@@ -14,10 +14,11 @@ data class Coin(
 
     fun toMap(): HashMap<String?, Any?> {
         return hashMapOf(
-                Pair("id", id),
-                Pair("currency", currency),
-                Pair("value", value),
-                Pair("gone", gone)
+                id to hashMapOf(
+                        "currency" to currency,
+                        "value" to value,
+                        "gone" to gone
+                )
         )
     }
 }

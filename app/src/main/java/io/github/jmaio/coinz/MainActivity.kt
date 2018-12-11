@@ -245,13 +245,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         }
     }
 
-    private fun fetchCoinMap() {
+    private fun fetchCoinMap(force: Boolean = false) {
         main_view.longSnackbar("Fetching coin map...")
         val today = LocalDateTime.now()
         val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
 
         // if map is already today's map
-        if (dateString == downloadDate && !coinzDebugMode) {
+        if (dateString == downloadDate && !coinzDebugMode && !force) {
             info("[fetchCoinMap]: dateString = $dateString = downloadDate - loading...")
         } else {
             // make url from date pattern

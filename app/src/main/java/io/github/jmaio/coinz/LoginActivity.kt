@@ -126,7 +126,7 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         val wallet = HashMap<String, Any>()
         wallet["id"] = email
         wallet["bankedToday"] = 0
-        wallet["coins"] = emptyList<Coin>()
+        wallet["coins"] = hashMapOf<String, Any?>()
         wallet["gold"] = 0.0
         info("[createFireBaseWallet] entered create method + set wallet val")
 

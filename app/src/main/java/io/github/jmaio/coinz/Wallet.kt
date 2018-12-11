@@ -12,13 +12,13 @@ import org.jetbrains.anko.info
 data class Wallet(
         val id: String?,
         val gold: Double,
-        val coins: MutableMap<String, Coin>,
+        val coins: HashMap<String, Coin>,
         var ids: MutableSet<String>,
         val ordered: MutableList<Coin>,
         val bankedToday: Int
 ) : Parcelable, AnkoLogger {
 
-    constructor() : this(null, 0.0, mutableMapOf<String, Coin>(), mutableSetOf(), mutableListOf(), 0)
+    constructor() : this(null, 0.0, hashMapOf<String, Coin>(), mutableSetOf(), mutableListOf(), 0)
     constructor(id: String?, w: Wallet) : this(id, w.gold, w.coins, w.ids, w.ordered, w.bankedToday)
 
     @IgnoredOnParcel
@@ -34,7 +34,7 @@ data class Wallet(
     }
 
     fun setIds() {
-        coins.forEach { id, _ ->
+        coins.forEach { id, c ->
             ids.add(id)
         }
     }
@@ -44,6 +44,7 @@ data class Wallet(
     }
 
     fun getCoin(id: String): Coin? {
+        info("[getCoin] returning ${coins[id]} for id = $id")
         return coins[id]
     }
 
@@ -64,8 +65,9 @@ data class Wallet(
     fun addCoinToWallet(wildCoin: WildCoin) {
         // will try to add even if coin is already present
         if (id != null) {
-            val coins = HashMap<String, Any?>()
-            coins["coins"] = wildCoin.toCoin().toMap()
+            val coins = hashMapOf<String, Any?>(
+                    "coins" to wildCoin.toCoin().toMap()
+            )
             walletCollection.document(id)
                     .set(coins, SetOptions.merge())
 //                    .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
@@ -80,10 +82,14 @@ data class Wallet(
 
     fun removeCoinFromWallet(coin: Coin) {
         if (id != null) {
-            if (coins.contains(coin.id) && !coin.gone) {
+            if (coin.id in coins && !coin.gone) {
+                val coins = hashMapOf<String, Any?>(
+                        "coins" to coin.apply { gone = true }.toMap()
+                )
                 info("[removeCoinFromWallet] this wallet has id = $id")
                 val w = walletCollection.document(id)
-                        .update("coins", FieldValue.arrayUnion(coin.apply { gone = true }.toMap()))
+                walletCollection.document(id)
+                        .set(coins, SetOptions.merge())
 //                    .whereEqualTo("id", coin.id).get()
                         .addOnCompleteListener { t ->
                             if (t.isSuccessful) coins[coin.id!!] = coin.apply { gone = true }

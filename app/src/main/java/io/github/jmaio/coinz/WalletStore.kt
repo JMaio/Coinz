@@ -1,8 +1,11 @@
 package io.github.jmaio.coinz
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -13,6 +16,7 @@ class WalletStore : AnkoLogger {
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
     }
+    lateinit var rates: Rates
 
     fun getWallet(user: FirebaseUser, callback: (Wallet) -> Unit) {
         // "guaranteed" to work for firebase user
@@ -27,14 +31,36 @@ class WalletStore : AnkoLogger {
         db.collection("wallets").document(id).get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val w = task.result!!.toObject(Wallet::class.java)!!
-                        w.setID(id)
-                        w.setIds()
+                        info("[getWallet] task successful -- ${task.result}")
+                        var w = task.result?.toObject(Wallet::class.java)
+                        if (w != null) {
+                            w = Wallet(id, w)
+                            w.setIds()
+                            info("[getWallet] wallet retrieved for ${w.id} --> $w")
+                        }
                         callback(w)
                     } else {
                         info("[getWallet] failed with ${task.result}")
+                        callback(null)
                     }
                 }
     }
+
+//    fun donateCoin(coinID: String, senderID: String, receiverID: String) {
+//        getWallet(senderID) { wSend ->
+//            val coin = wSend!!.coins.find { c ->
+//                c.id == coinID
+//            }
+//            info("[donateCoin] coin is ${coin?.value}, ${coin?.currency}")
+//            if (coin != null && !coin.gone) {
+//                val rate = rates.toMap()[coin.currency]!!
+//                // coin is in the wallet
+//                getWallet(receiverID) { w ->
+//                    if (w == null) throw Exception("Receiver wallet not found!") // wallet not found
+//                    w.addGold(coin.value!! * rate) //coin.currency)
+//                }
+//            } else throw Exception("You don't have this coin anymore!")
+//        }
+//    }
 
 }

@@ -1,7 +1,7 @@
 package io.github.jmaio.coinz
 
+import android.content.DialogInterface
 import android.os.Bundle
-import android.text.Layout
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_wallet.*
 import org.jetbrains.anko.*
+import org.jetbrains.anko.design.indefiniteSnackbar
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class WalletActivity : AppCompatActivity(), AnkoLogger {
@@ -22,12 +23,15 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     private lateinit var wallet: Wallet
+    private var rates: Rates? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wallet)
 
         val w: Wallet? = intent.extras?.getParcelable("wallet")
+        rates = intent.extras?.getParcelable("rates")
+
         if (w != null) {
             wallet = w
 
@@ -39,10 +43,11 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             wallet.gold.toString().split('.').let { (u, d) ->
                 gold_chip.text = getString(R.string.value_display, u, d.take(6))
             }
+
+            viewAdapter = WalletAdapter(wallet, rates)
         }
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = WalletAdapter(wallet)
 
         recyclerView = findViewById<RecyclerView>(R.id.wallet_items_view).apply {
             // use this setting to improve performance if you know that changes
@@ -60,7 +65,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
 
     }
 
-    class WalletAdapter(private val wallet: Wallet) :
+    class WalletAdapter(private val wallet: Wallet, val rates: Rates?) :
             RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
 
         // Provide a reference to the views for each data item
@@ -68,7 +73,6 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
         // you provide access to all the views for a data item in a view holder.
         // Each data item is just a string in this case that is shown in a TextView.
         class WalletViewHolder(val view: View,
-//                               val listener: (View) -> Unit,
                                val curr: TextView = view.findViewById(R.id.wallet_curr_text),
                                val currUnits: TextView = view.findViewById(R.id.wallet_curr_units),
                                val currDec: TextView = view.findViewById(R.id.wallet_curr_dec),
@@ -100,7 +104,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
         override fun onBindViewHolder(holder: WalletViewHolder, position: Int) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
-            val coin = wallet.coins[position]
+            val coin = wallet.availableCoins()[position]
             val drawables = mapOf(
                     Pair("shil", R.drawable.marker_shil),
                     Pair("dolr", R.drawable.marker_dolr),
@@ -110,42 +114,73 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             holder.apply {
                 curr.apply {
                     text = coin.currency
-                    setCompoundDrawablesWithIntrinsicBounds(0, drawables[coin.currency!!.toLowerCase()]!!, 0, 0)
+                    setCompoundDrawablesWithIntrinsicBounds(0, drawables[coin.currency.toLowerCase()]!!, 0, 0)
                 }
                 coin.value.toString().split('.').let { (u, d) ->
                     currUnits.text = u
                     currDec.text = d.take(6)
                 }
-                button.setOnClickListener { v ->
-                    v.context.alert {
-                        title = "Sending ${coin.currency} (${coin.value.toString().take(8)})"
-                        message = "Please specify the wallet of the receiver below:"
-                        customView {
-                            verticalLayout {
-                                val receiver = editText {
-                                    hint = "Receiver ID"
-                                }.lparams {
-                                    width = matchParent
-                                    horizontalPadding = dip(32)
-                                }
-                                button("Send") {
-                                    onClick {
-                                        if (wallet.donateCoin(coin.id!!, receiver.text.toString()))
-                                        ctx.toast("sending coin to ${receiver.text}")
+                if (!coin.gone) {
+                    button.setOnClickListener { v ->
+                        if (rates != null) {
+                            lateinit var dialog: DialogInterface
+                            dialog = v.context.alert {
+                                title = "Sending ${coin.currency} (${coin.value.toString().take(8)})"
+                                message = "Please specify the username of the receiver:"
+                                customView {
+                                    verticalLayout {
+                                        val receiver = editText {
+                                            hint = "Receiver username"
+                                        }.lparams(width = matchParent) {
+                                            horizontalPadding = dip(32)
+                                        }
+                                        button("Send") {
+                                            onClick {
+                                                info("[donateCoin] wallet is $wallet")
+                                                val recv = receiver.text.toString()
+                                                if (recv.isBlank()) ctx.toast("Please enter a valid username")
+                                                else {
+                                                    try {
+                                                        wallet.donateCoin(coin.id, recv, rates) { g ->
+                                                            info("sending coin $coin")
+                                                            if (g == null) ctx.longToast("Could not send this coin!")
+                                                            else ctx.longToast("sending ${g.toString().take(7)} Gold to ${receiver.text}")
+                                                            button.apply {
+                                                                isClickable = false
+                                                                isEnabled = false
+                                                                imageAlpha = 32
+                                                            }
+                                                        }
+                                                    } catch (e: Exception) {
+                                                        info("[donateCoin] -- exception ${e.message}")
+                                                        ctx.longToast(e.message.toString())
+                                                    } finally {
+                                                        dialog.dismiss()
+                                                        info("[donateCoin] dialog dismissed")
+                                                    }
+                                                }
+                                            }
+                                        }.lparams(width = wrapContent) {
+                                            gravity = Gravity.CENTER
+                                        }
                                     }
-                                }.lparams {
-                                    width = wrapContent
-                                    gravity = Gravity.CENTER
                                 }
-                            }
+                            }.show()
+                        } else {
+                            v.indefiniteSnackbar("Exchange rates missing! Please wait until the map has been downloaded and try again.").show()
                         }
-                    }.show()
+                    }
+                } else {
+//                    button.apply {
+//                        isClickable = false
+//                        isEnabled = false
+//                    }
                 }
             }
         }
 
         // Return the size of your dataset (invoked by the layout manager)
-        override fun getItemCount() = wallet.coins.size
+        override fun getItemCount() = wallet.availableCoins().size
     }
 
 }

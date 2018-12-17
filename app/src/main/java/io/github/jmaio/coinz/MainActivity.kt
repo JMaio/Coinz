@@ -283,7 +283,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
                     } else {
                         main_view.indefiniteSnackbar("Could not fetch map! Please check your connection.", "retry?") {
                             doAsync {
-                                fetchCoinMap()
+                                fetchCoinMap(force = true)
                             }
                         }
                     }

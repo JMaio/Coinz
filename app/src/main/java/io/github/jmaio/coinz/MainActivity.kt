@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
                     if (!features.isEmpty()) {
                         val selectedFeature = features[0]
                         val id = selectedFeature.getStringProperty("id")
-                        collectCoinFromMap(id)
+                        collectCoinFromMapDebug(id)
                     }
                 }
             }
@@ -275,15 +275,15 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
                         main_view.snackbar("Map loaded successfully!")
                         downloadDate = dateString
                         addMarkerLayers()
+                        if (coinMap!!.isEmpty()) {
+                            main_view.indefiniteSnackbar("Looks like you've collected all 50 coins today. Good job!", "Yay!") {}
+                        }
                     } else {
                         main_view.indefiniteSnackbar("Could not fetch map! Please check your connection.", "retry?") {
                             doAsync {
                                 fetchCoinMap()
                             }
                         }
-                    }
-                    if (coinMap!!.isEmpty()) {
-                        main_view.indefiniteSnackbar("Looks like you've collected all 50 coins today. Good job!", "Yay!") {}
                     }
                 }
             }
@@ -327,14 +327,14 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         val source = geoJsonSources[curr]
         toast("Coin collected!\n(${curr.toUpperCase()} ${wildCoin.properties.value})")
         coinMap?.collectCoin(wildCoin)
+        wallet.addCoinToWallet(wildCoin)
         source!!.setGeoJson(coinMap?.toGeoJson(curr))
     }
 
-    private fun collectCoinFromMap(id: String) {
+    private fun collectCoinFromMapDebug(id: String) {
         try {
             val coin = coinMap!!.getCoinByID(id)!! // coinMap!!.coins.find { wildCoin -> wildCoin.properties.id == id }!!
             info("[collectCoinFromMap] collecting coin $id - $coin")
-            wallet.addCoinToWallet(coin)
             collectCoinFromMap(coin)
         } catch (e: Exception) {
             info("[collectCoinFromMap] error collecting $id with error $e")

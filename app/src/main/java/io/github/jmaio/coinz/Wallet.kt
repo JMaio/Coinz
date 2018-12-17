@@ -1,7 +1,6 @@
 package io.github.jmaio.coinz
 
 import android.os.Parcelable
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize

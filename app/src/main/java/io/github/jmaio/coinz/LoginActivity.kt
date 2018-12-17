@@ -43,7 +43,7 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         }
 
         // bypass login for testing
-        text_welcome.setOnClickListener { view ->
+        text_welcome.setOnClickListener {
             gotoMain()
         }
 

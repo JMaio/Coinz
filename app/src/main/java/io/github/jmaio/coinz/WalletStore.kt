@@ -1,11 +1,8 @@
 package io.github.jmaio.coinz
 
-import android.os.Parcel
-import android.os.Parcelable
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -28,22 +25,22 @@ class WalletStore : AnkoLogger {
     fun getWallet(id: String, callback: (Wallet?) -> Unit) {
         info("[getWallet] getting $id's wallet...")
         if (id.isNotEmpty())
-        db.collection("wallets").document(id).get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        info("[getWallet] task successful -- ${task.result.toString().take(100)}...")
-                        var w = task.result?.toObject(Wallet::class.java)
-                        if (w != null) {
-                            w = Wallet(id, w)
-                            w.setIds()
-                            info("[getWallet] wallet retrieved for ${w.id} --> ${w.toString().take(100)}}...")
+            db.collection("wallets").document(id).get()
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            info("[getWallet] task successful -- ${task.result.toString().take(100)}...")
+                            var w = task.result?.toObject(Wallet::class.java)
+                            if (w != null) {
+                                w = Wallet(id, w)
+                                w.setIds()
+                                info("[getWallet] wallet retrieved for ${w.id} --> ${w.toString().take(100)}}...")
+                            }
+                            callback(w)
+                        } else {
+                            info("[getWallet] failed with ${task.result}")
+                            callback(null)
                         }
-                        callback(w)
-                    } else {
-                        info("[getWallet] failed with ${task.result}")
-                        callback(null)
                     }
-                }
     }
 
 //    fun donateCoin(coinID: String, senderID: String, receiverID: String) {

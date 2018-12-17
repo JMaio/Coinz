@@ -267,7 +267,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
             val maker = CoinMapMaker(w)
             doAsync {
                 coinMap = maker.loadMapFromFile(coinzmapFile)
-                info("[fetchCoinMap]: map loaded : $coinMap")
+                info("[fetchCoinMap]: map loaded : ${coinMap.toString().take(100)}...")
                 runOnUiThread {
                     if (coinMap != null) {
                         main_view.snackbar("Map loaded successfully!")

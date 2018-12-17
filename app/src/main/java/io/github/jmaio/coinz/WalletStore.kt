@@ -31,12 +31,12 @@ class WalletStore : AnkoLogger {
         db.collection("wallets").document(id).get()
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        info("[getWallet] task successful -- ${task.result}")
+                        info("[getWallet] task successful -- ${task.result.toString().take(100)}...")
                         var w = task.result?.toObject(Wallet::class.java)
                         if (w != null) {
                             w = Wallet(id, w)
                             w.setIds()
-                            info("[getWallet] wallet retrieved for ${w.id} --> $w")
+                            info("[getWallet] wallet retrieved for ${w.id} --> ${w.toString().take(100)}}...")
                         }
                         callback(w)
                     } else {

@@ -8,6 +8,7 @@
     <string name="curr_dolr">DOLR</string>
     <string name="curr_quid">QUID</string>
     <string name="curr_peny">PENY</string>
+    <string name="curr_gold">Gold</string>
     <string name="location_explanation">Location permissions are necessary to play Coinz. Please press \"OK\" to enable location access.</string>
     <string name="map_repo">http://homepages.inf.ed.ac.uk/stg/coinz</string>
     <string name="coinmap_filename">coinzmap.geojson</string>
@@ -28,6 +29,9 @@
     <string name="start_login">Please register an account below (or sign in if you already have one)</string>
     <string name="action_register">Register</string>
     <string name="title_activity_wallet">Coinz Wallet</string>
+    <string name="value_display"><big>%1$s</big>.<small>%2$s</small></string>
+    <string name="coins_collected">Coins collected</string>
+    <string name="coins_collected_progress">%1$d / 50</string>
     <string name="title_activity_bank">Coinz Bank</string>
     <string name="title_activity_settings">Settings</string>
 </resources>

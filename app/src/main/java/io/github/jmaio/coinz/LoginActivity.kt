@@ -43,7 +43,7 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         }
 
         // bypass login for testing
-        text_welcome.setOnClickListener { view ->
+        text_welcome.setOnClickListener {
             gotoMain()
         }
 
@@ -103,7 +103,7 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
                 info("new user has id ${newUser?.uid}")
                 // create a new wallet with this ID
                 try {
-                    createFireBaseWallet(newUser!!.uid)
+                    createFireBaseWallet(newUser!!.email!!)
                     gotoMain()
                 } catch (e: Exception) {
                     newUser!!.delete()
@@ -121,18 +121,20 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         }
     }
 
-    private fun createFireBaseWallet(uid: String) {
+    private fun createFireBaseWallet(email: String) {
         // and create a wallet
         val wallet = HashMap<String, Any>()
-        wallet["coins"] = emptyList<Coin>()
+        wallet["id"] = email
+        wallet["bankedToday"] = 0
+        wallet["coins"] = hashMapOf<String, Any?>()
         wallet["gold"] = 0.0
         info("[createFireBaseWallet] entered create method + set wallet val")
 
         // Add a new document with a generated ID
         db.collection("wallets")
-                .document(uid).set(wallet)
+                .document(email).set(wallet)
                 .addOnSuccessListener {
-                    info("[createFireBaseWallet] DocumentSnapshot added with ID: $uid")
+                    info("[createFireBaseWallet] DocumentSnapshot added with ID: $email")
                 }
                 .addOnFailureListener { e ->
                     info("[createFireBaseWallet] Error adding document: $e")

@@ -143,12 +143,10 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                                                     try {
                                                         wallet.donateCoin(coin.id, recv, rates) { g ->
                                                             info("sending coin $coin")
-                                                            if (g == null) ctx.longToast("Could not send this coin!")
-                                                            else ctx.longToast("sending ${g.toString().take(7)} Gold to ${receiver.text}")
-                                                            button.apply {
-                                                                isClickable = false
-                                                                isEnabled = false
-                                                                imageAlpha = 32
+                                                            if (g == null) { ctx.longToast("Could not send this coin!") }
+                                                            else {
+                                                                notifyItemRemoved(position)
+                                                                ctx.longToast("sending ${g.toString().take(7)} Gold to ${receiver.text}")
                                                             }
                                                         }
                                                     } catch (e: Exception) {

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="6dp"
+    android:layout_weight="1"
+    app:cardElevation="2dp"
+    app:contentPadding="12dp"
+    app:contentPaddingLeft="16dp"
+    app:contentPaddingRight="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:dividerPadding="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/wallet_curr_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-3dp"
+            android:drawableTop="@drawable/marker_dolr"
+            android:drawablePadding="-6dp"
+            android:gravity="center_vertical"
+            android:paddingEnd="16dp"
+            android:text="DOLR"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+
+        <TextView
+            android:id="@+id/wallet_curr_units"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="9"
+            android:textAppearance="@android:style/TextAppearance.Material.Headline"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/textView8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="."
+            android:textAppearance="@android:style/TextAppearance.Material.Medium"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/wallet_curr_dec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="20"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingHorizontal="8dp"
+            android:text="≈"
+            android:textAlignment="textEnd"
+            android:textAppearance="@android:style/TextAppearance.Material.Large" />
+
+        <TextView
+            android:id="@+id/wallet_gold_units"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="134"
+            android:textAppearance="@android:style/TextAppearance.Material.Headline"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="."
+            android:textAppearance="@android:style/TextAppearance.Material.Medium"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/wallet_gold_dec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="01"
+            android:textAppearance="@android:style/TextAppearance.Material.Medium"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/gold_symbol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:text="G"
+            android:textAppearance="@android:style/TextAppearance.Material.Large"
+            android:textColor="@color/colorQuid"
+            android:typeface="serif" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="8dp"
+            android:background="?android:attr/listDivider" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:paddingHorizontal="12dp"
+            android:src="@drawable/ic_send_white_24dp"
+            android:tint="@color/colorPrimary" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

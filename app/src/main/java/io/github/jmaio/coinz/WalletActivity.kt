@@ -65,7 +65,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
 
     }
 
-    class WalletAdapter(private val wallet: Wallet, val rates: Rates?) :
+    class WalletAdapter(private val wallet: Wallet, private val rates: Rates?) :
             RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
 
         // Provide a reference to the views for each data item
@@ -94,7 +94,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             // create a new view
             val itemView = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_wallet, parent, false) as View
-            // set the view's size, margins, paddings and layout parameters
+            // set the view's size, margins, padding and layout parameters
 
 
             return WalletViewHolder(itemView)
@@ -143,8 +143,9 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                                                     try {
                                                         wallet.donateCoin(coin.id, recv, rates) { g ->
                                                             info("sending coin $coin")
-                                                            if (g == null) { ctx.longToast("Could not send this coin!") }
-                                                            else {
+                                                            if (g == null) {
+                                                                ctx.longToast("Could not send this coin!")
+                                                            } else {
                                                                 notifyItemRemoved(position)
                                                                 ctx.longToast("sending ${g.toString().take(7)} Gold to ${receiver.text}")
                                                             }

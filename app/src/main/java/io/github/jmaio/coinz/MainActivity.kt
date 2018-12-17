@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         // set currently signed-in user and display it
         auth.currentUser.let { u ->
             if (u != null)
-            user = u
+                user = u
             u?.email.let { e ->
                 if (e != null)
                     userDisplay = e
@@ -185,13 +185,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
             }
         }
 
-            val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
-            // use ”” as the default value (this might be the first time the app is run)
-            downloadDate = settings.getString("lastDownloadDate", "")
-            info("[onStart] last map load date = '$downloadDate'")
+        val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
+        // use ”” as the default value (this might be the first time the app is run)
+        downloadDate = settings.getString("lastDownloadDate", "")
+        info("[onStart] last map load date = '$downloadDate'")
 
-            mapView?.onStart()
-        }
+        mapView?.onStart()
+    }
 
     override fun onResume() {
         super.onResume()
@@ -263,6 +263,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
             val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
             coinMapDownloader.execute()
         }
+
+        // get this user's wallet as a basis for populating the map
         walletStore.getWallet(user) { w ->
             wallet = w
             val maker = CoinMapMaker(w)

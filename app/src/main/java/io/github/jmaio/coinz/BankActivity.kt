@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_bank.*
 import org.jetbrains.anko.toast
 
-class BankActivity : AppCompatActivity() {
+class BankActivity : AppCompatActivity(), AnkoLogger {
 
     private var coinMap: CoinMap? = null
 

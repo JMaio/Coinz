@@ -66,6 +66,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     private var coinzDebugMode = true
 
     private var coinMap: CoinMap? = null
+    private var rates: Rates? = null
     private lateinit var coinzmapFile: String
 
     private lateinit var currencies: List<String>
@@ -267,6 +268,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
             val maker = CoinMapMaker(w)
             doAsync {
                 coinMap = maker.loadMapFromFile(coinzmapFile)
+                rates = coinMap?.rates
                 info("[fetchCoinMap]: map loaded : ${coinMap.toString().take(100)}...")
                 runOnUiThread {
                     if (coinMap != null) {
@@ -343,7 +345,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         fab.setOnClickListener {
             walletStore.getWallet(user) { w ->
                 wallet = w
-                startActivity(Intent(this, WalletActivity::class.java).putExtra("wallet", wallet))
+                startActivity(Intent(this, WalletActivity::class.java)
+                        .putExtra("wallet", wallet)
+                        .putExtra("rates", rates)
+                )
             }
         }
 

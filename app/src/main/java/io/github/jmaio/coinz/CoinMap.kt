@@ -111,7 +111,7 @@ data class CoinMap(var coins: MutableList<WildCoin>,
             f.asJsonObject.addProperty("type", "Feature")
             featureCollection.add(Feature.fromJson(f.toString()))
         }
-        info("new $c map: (${featureCollection.size}) $featureCollection")
+        info("[toGeoJson] new $c map: (${featureCollection.size}) ${featureCollection.toString().take(100)}...")
 
         return FeatureCollection.fromFeatures(featureCollection)
 
@@ -137,7 +137,7 @@ class CoinMapMaker(var wallet: Wallet) : AnkoLogger {
             info("[loadMapFromFile] : read file OK ($file)")
             val j = JsonParser().parse(s)
 
-            info("[loadMapFromFile] : GeoJSON parse OK -- $j")
+            info("[loadMapFromFile] : GeoJSON parse OK -- ${j.toString().take(100)}...")
 
             val features = j.asJsonObject.get("features").asJsonArray
 
@@ -152,7 +152,7 @@ class CoinMapMaker(var wallet: Wallet) : AnkoLogger {
             info("[loadMapFromFile] : GeoJSON contains ${features.size()} features")
             val allCoins = mutableListOf<WildCoin>()
 //            val collectedCoins = db
-            info("wallet ids: ${wallet}")
+            info("wallet: ${wallet.toString().take(100)}...")
 
             for (i in 0 until features.size()) {
                 val f = features.get(i).asJsonObject

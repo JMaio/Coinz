@@ -12,7 +12,6 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.mapbox.android.core.location.LocationEngineListener
@@ -25,7 +24,6 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.style.expressions.Expression.get
 import com.mapbox.mapboxsdk.style.layers.Property.*
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
@@ -45,21 +43,17 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
     private var locationComponent: LocationComponent? = null
-    private lateinit var symbolManager: SymbolManager
     private var shilSource: GeoJsonSource? = null
     private var dolrSource: GeoJsonSource? = null
     private var quidSource: GeoJsonSource? = null
     private var penySource: GeoJsonSource? = null
     private var geoJsonSources = mutableMapOf<String, GeoJsonSource?>()
 
-    private val fbAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance().apply {
-        firestoreSettings = FirebaseFirestoreSettings.Builder()
-                .setTimestampsInSnapshotsEnabled(true)
-                .build()
-    }
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
     private lateinit var user: FirebaseUser
     private var wallet = Wallet()
+    private var walletStore = WalletStore()
     private var userDisplay = "defaultUser"
 
     private val centralBounds = LatLngBounds.Builder()
@@ -71,6 +65,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     private var coinzDebugMode = true
 
     private var coinMap: CoinMap? = null
+    private var rates: Rates? = null
     private lateinit var coinzmapFile: String
 
     private lateinit var currencies: List<String>
@@ -78,7 +73,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance().apply {
+            firestoreSettings = FirebaseFirestoreSettings.Builder()
+                    .setTimestampsInSnapshotsEnabled(true)
+                    .build()
+        }
         // Mapbox access token is configured here. This needs to be called either in your application
         // object or in the same activity which contains the mapview.
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
@@ -99,10 +100,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
                 Pair(getString(R.string.curr_quid).toLowerCase(), quidSource),
                 Pair(getString(R.string.curr_peny).toLowerCase(), penySource)
         )
-
-
-        user = fbAuth.currentUser!!
-        if (user.email != null) userDisplay = user.email.toString()
 
         createOnClickListeners()
 
@@ -132,7 +129,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
                     if (!features.isEmpty()) {
                         val selectedFeature = features[0]
                         val id = selectedFeature.getStringProperty("id")
-                        collectCoinFromMap(id)
+                        collectCoinFromMapDebug(id)
                     }
                 }
             }
@@ -176,13 +173,23 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     override fun onStart() {
         super.onStart()
 
+        // set currently signed-in user and display it
+        auth.currentUser.let { u ->
+            if (u != null)
+                user = u
+            u?.email.let { e ->
+                if (e != null)
+                    userDisplay = e
+                user_id_chip.text = e
+            }
+        }
+
         val settings = getSharedPreferences(getString(R.string.preferences_file), Context.MODE_PRIVATE)
         // use ”” as the default value (this might be the first time the app is run)
         downloadDate = settings.getString("lastDownloadDate", "")
         info("[onStart] last map load date = '$downloadDate'")
 
         mapView?.onStart()
-
     }
 
     override fun onResume() {
@@ -238,26 +245,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         }
     }
 
-    private fun getWallet(user: FirebaseUser, callback: (Wallet) -> Unit) {
-        db.collection("wallets").document(user.uid).get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val w = task.result!!.toObject(Wallet::class.java)!!
-                        w.setIds()
-                        callback(w)
-                    } else {
-                        info("get failed with ${task.result}")
-                    }
-                }
-    }
-
-    private fun fetchCoinMap() {
+    private fun fetchCoinMap(force: Boolean = false) {
         main_view.longSnackbar("Fetching coin map...")
         val today = LocalDateTime.now()
         val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
 
         // if map is already today's map
-        if (dateString == downloadDate && !coinzDebugMode) {
+        if (dateString == downloadDate && !coinzDebugMode && !force) {
             info("[fetchCoinMap]: dateString = $dateString = downloadDate - loading...")
         } else {
             // make url from date pattern
@@ -268,26 +262,29 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
             val coinMapDownloader = DownloadFileTask(url, coinzmapFile)
             coinMapDownloader.execute()
         }
-        getWallet(user) { w ->
+
+        // get this user's wallet as a basis for populating the map
+        walletStore.getWallet(user) { w ->
             wallet = w
             val maker = CoinMapMaker(w)
             doAsync {
                 coinMap = maker.loadMapFromFile(coinzmapFile)
-                info("[fetchCoinMap]: map loaded : $coinMap")
+                rates = coinMap?.rates
+                info("[fetchCoinMap]: map loaded : ${coinMap.toString().take(100)}...")
                 runOnUiThread {
                     if (coinMap != null) {
                         main_view.snackbar("Map loaded successfully!")
                         downloadDate = dateString
                         addMarkerLayers()
+                        if (coinMap!!.isEmpty()) {
+                            main_view.indefiniteSnackbar("Looks like you've collected all 50 coins today. Good job!", "Yay!") {}
+                        }
                     } else {
                         main_view.indefiniteSnackbar("Could not fetch map! Please check your connection.", "retry?") {
                             doAsync {
-                                fetchCoinMap()
+                                fetchCoinMap(force = true)
                             }
                         }
-                    }
-                    if (coinMap!!.isEmpty()) {
-                        main_view.indefiniteSnackbar("Looks like you've collected all 50 coins today. Good job!", "Yay!") {}
                     }
                 }
             }
@@ -331,40 +328,36 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         val source = geoJsonSources[curr]
         toast("Coin collected!\n(${curr.toUpperCase()} ${wildCoin.properties.value})")
         coinMap?.collectCoin(wildCoin)
+        wallet.addCoinToWallet(wildCoin)
         source!!.setGeoJson(coinMap?.toGeoJson(curr))
     }
 
-    private fun collectCoinFromMap(id: String) {
+    private fun collectCoinFromMapDebug(id: String) {
         try {
             val coin = coinMap!!.getCoinByID(id)!! // coinMap!!.coins.find { wildCoin -> wildCoin.properties.id == id }!!
             info("[collectCoinFromMap] collecting coin $id - $coin")
-            addCoinToWallet(coin)
             collectCoinFromMap(coin)
         } catch (e: Exception) {
             info("[collectCoinFromMap] error collecting $id with error $e")
         }
     }
 
-    private fun addCoinToWallet(wildCoin: WildCoin) {
-        // will try to add even if coin is already present
-        db.collection("wallets").document(user.uid)
-                .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
-                .addOnSuccessListener { info("successfully added coin ${wildCoin.properties.id} to ${user.email}'s wallet") }
-                .addOnFailureListener { e -> info("could not add coin ${wildCoin.properties.id} to ${user.email}'s wallet - $e") }
-
-        info("[addCoinToWallet] method complete")
-    }
-
     private fun createOnClickListeners() {
         fab.setOnClickListener {
-            getWallet(user) { w ->
+            walletStore.getWallet(user) { w ->
                 wallet = w
-                startActivity(Intent(this, WalletActivity::class.java).putExtra("wallet", wallet))
+                startActivity(Intent(this, WalletActivity::class.java)
+                        .putExtra("wallet", wallet)
+                        .putExtra("rates", rates)
+                )
             }
         }
 
         bottom_app_bar.setNavigationOnClickListener {
-            startActivity(Intent(this, BankActivity::class.java).putExtra("coinMap", coinMap))
+            walletStore.getWallet(user) { w ->
+                wallet = w
+                startActivity(Intent(this, BankActivity::class.java).putExtra("wallet", wallet))
+            }
         }
 
         val buttons = listOf(button_shil, button_dolr, button_quid, button_peny)
@@ -384,14 +377,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
         // show user id at the top of the screen
         user_id_chip.apply {
-            text = userDisplay
             setOnClickListener {
                 info("[user_id_chip] pressed")
                 alert {
                     title = "Log Out?"
                     message = "Currently logged in as $userDisplay.\nContinue?"
                     yesButton {
-                        fbAuth.signOut()
+                        auth.signOut()
                         startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                         this@MainActivity.finish()
                     }

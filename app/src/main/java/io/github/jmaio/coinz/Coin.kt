@@ -5,17 +5,20 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Coin(
-        val id: String?,
-        val currency: String?,
-        val value: Double?
+        val id: String = "",
+        val currency: String = "",
+        val value: Double = .0,
+        var gone: Boolean = false
 ) : Parcelable {
-    constructor() : this("", "", .0)
 
     fun toMap(): HashMap<String?, Any?> {
         return hashMapOf(
-                Pair("id", id),
-                Pair("currency", currency),
-                Pair("value", value)
+                id to hashMapOf(
+                        "id" to id,
+                        "currency" to currency,
+                        "value" to value,
+                        "gone" to gone
+                )
         )
     }
 }

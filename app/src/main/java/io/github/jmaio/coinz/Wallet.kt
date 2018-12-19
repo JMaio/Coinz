@@ -24,6 +24,7 @@ data class Wallet(
     private val walletStore = WalletStore()
     @IgnoredOnParcel
     private val walletCollection = walletStore.db.collection("wallets")
+    val size get() = coins.size
 
     fun init() {
         this.apply {

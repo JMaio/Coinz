@@ -121,7 +121,7 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
             holder.apply {
                 curr.apply {
                     text = coin.currency
-                    setCompoundDrawablesWithIntrinsicBounds(0, drawables[coin.currency!!.toLowerCase()]!!, 0, 0)
+                    setCompoundDrawablesWithIntrinsicBounds(0, drawables[coin.currency.toLowerCase()]!!, 0, 0)
                 }
                 coin.value.toString().split('.').let { (u, d) ->
                     currUnits.text = u

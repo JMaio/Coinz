@@ -127,7 +127,7 @@ data class Wallet(
         walletStore.getWallet(walletID) { w ->
             if (w == null) callback(null)
             else {
-                val g = coin.value!! * rate
+                val g = coin.value * rate
                 removeCoinFromWallet(coin)
                 w.addGold(g)
                 callback(g)

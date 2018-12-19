@@ -71,7 +71,7 @@
     </androidx.recyclerview.widget.RecyclerView>
 
     <com.google.android.material.chip.Chip
-        android:id="@+id/gold_chip"
+        android:id="@+id/wallet_gold_chip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_bank.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.jetbrains.anko.padding
 import org.jetbrains.anko.toast
 
@@ -48,7 +49,7 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
 
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = BankAdapter(wallet)
+        viewAdapter = BankAdapter(wallet, rates)
 
         recyclerView = findViewById<RecyclerView>(R.id.bank_items_view).apply {
             // use this setting to improve performance if you know that changes
@@ -90,17 +91,17 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
     }
 
 
-    class BankAdapter(private val wallet: Wallet) :
-            RecyclerView.Adapter<BankAdapter.BankViewHolder>() {
+    class BankAdapter(private val wallet: Wallet, private val rates: Rates?) :
+            RecyclerView.Adapter<BankAdapter.BankViewHolder>(), AnkoLogger {
 
         // Provide a reference to the views for each data item
         // Complex data items may need more than one view per item, and
         // you provide access to all the views for a data item in a view holder.
         // Each data item is just a string in this case that is shown in a TextView.
         class BankViewHolder(val view: View,
-                             val curr: TextView = view.findViewById(R.id.wallet_curr_text),
-                             val currUnits: TextView = view.findViewById(R.id.wallet_curr_units),
-                             val currDec: TextView = view.findViewById(R.id.wallet_curr_dec)
+                             val curr: TextView = view.findViewById(R.id.bank_curr_text),
+                             val currUnits: TextView = view.findViewById(R.id.bank_curr_units),
+                             val currDec: TextView = view.findViewById(R.id.bank_curr_dec)
         ) : RecyclerView.ViewHolder(view), AnkoLogger {
 //        val curr = R.id.wallet_curr_text
 //        val currUnits = R.id.wallet_curr_units
@@ -113,7 +114,7 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
                                         viewType: Int): BankAdapter.BankViewHolder {
             // create a new view
             val itemView = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_wallet, parent, false) as View
+                    .inflate(R.layout.item_bank, parent, false) as View
             // set the view's size, margins, padding and layout parameters
             itemView.padding = 20
 //        val p = 30
@@ -126,6 +127,7 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
         override fun onBindViewHolder(holder: BankViewHolder, position: Int) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
+            info("[onBindViewHolder] wallet size ${wallet.availableCoins().size}")
             val coin = wallet.availableCoins()[position]
             val drawables = mapOf(
                     "shil" to R.drawable.marker_shil,
@@ -146,7 +148,7 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
         }
 
         // Return the size of your dataset (invoked by the layout manager)
-        override fun getItemCount() = wallet.coins.size
+        override fun getItemCount() = wallet.availableCoins().size
 
 
     }

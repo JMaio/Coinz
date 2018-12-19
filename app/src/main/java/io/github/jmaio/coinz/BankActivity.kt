@@ -113,10 +113,10 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
             // - replace the contents of the view with that element
             val coin = wallet.availableCoins()[position]
             val drawables = mapOf(
-                    Pair("shil", R.drawable.marker_shil),
-                    Pair("dolr", R.drawable.marker_dolr),
-                    Pair("quid", R.drawable.marker_quid),
-                    Pair("peny", R.drawable.marker_peny)
+                    "shil" to R.drawable.marker_shil,
+                    "dolr" to R.drawable.marker_dolr,
+                    "quid" to R.drawable.marker_quid,
+                    "peny" to R.drawable.marker_peny
             )
             holder.apply {
                 curr.apply {

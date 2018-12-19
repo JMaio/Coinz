@@ -26,10 +26,25 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bank)
         setupActionBar()
+
+        rates = intent.extras?.getParcelable("rates")
         setupRates()
 
-        wallet = intent.extras?.getParcelable("wallet")!!
-        rates = intent.extras?.getParcelable("rates")
+        val w: Wallet? = intent.extras?.getParcelable("wallet")
+        if (w != null) {
+            wallet = w
+
+            // set progress
+//            val p = wallet.coins.size
+//            wallet_progress_text.text = getString(R.string.coins_collected_progress, p)
+//            wallet_day_progressbar.progress = (p * 2)
+
+            wallet.gold.toString().split('.').let { (u, d) ->
+                bank_gold_chip.text = getString(R.string.value_display, u, d.take(6))
+            }
+
+            viewAdapter = BankActivity.BankAdapter(wallet, rates)
+        }
 
 
         viewManager = LinearLayoutManager(this)

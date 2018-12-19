@@ -33,7 +33,7 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
 
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = WalletAdapter(wallet)
+        viewAdapter = BankAdapter(wallet)
 
         recyclerView = findViewById<RecyclerView>(R.id.bank_items_view).apply {
             // use this setting to improve performance if you know that changes
@@ -75,17 +75,17 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
     }
 
 
-    class WalletAdapter(private val wallet: Wallet) :
-            RecyclerView.Adapter<WalletAdapter.WalletViewHolder>() {
+    class BankAdapter(private val wallet: Wallet) :
+            RecyclerView.Adapter<BankAdapter.BankViewHolder>() {
 
         // Provide a reference to the views for each data item
         // Complex data items may need more than one view per item, and
         // you provide access to all the views for a data item in a view holder.
         // Each data item is just a string in this case that is shown in a TextView.
-        class WalletViewHolder(val view: View,
-                               val curr: TextView = view.findViewById(R.id.wallet_curr_text),
-                               val currUnits: TextView = view.findViewById(R.id.wallet_curr_units),
-                               val currDec: TextView = view.findViewById(R.id.wallet_curr_dec)
+        class BankViewHolder(val view: View,
+                             val curr: TextView = view.findViewById(R.id.wallet_curr_text),
+                             val currUnits: TextView = view.findViewById(R.id.wallet_curr_units),
+                             val currDec: TextView = view.findViewById(R.id.wallet_curr_dec)
         ) : RecyclerView.ViewHolder(view), AnkoLogger {
 //        val curr = R.id.wallet_curr_text
 //        val currUnits = R.id.wallet_curr_units
@@ -95,20 +95,20 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
 
         // Create new views (invoked by the layout manager)
         override fun onCreateViewHolder(parent: ViewGroup,
-                                        viewType: Int): WalletAdapter.WalletViewHolder {
+                                        viewType: Int): BankAdapter.BankViewHolder {
             // create a new view
             val itemView = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_wallet, parent, false) as View
-            // set the view's size, margins, paddings and layout parameters
+            // set the view's size, margins, padding and layout parameters
             itemView.padding = 20
 //        val p = 30
 //        itemView.setContentPadding(p, p, p, p)
 
-            return WalletViewHolder(itemView)
+            return BankViewHolder(itemView)
         }
 
         // Replace the contents of a view (invoked by the layout manager)
-        override fun onBindViewHolder(holder: WalletViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: BankViewHolder, position: Int) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
             val coin = wallet.availableCoins()[position]

@@ -14,7 +14,7 @@ data class Wallet(
         val coins: HashMap<String, Coin>,
         var ids: MutableSet<String>,
         val ordered: MutableList<Coin>,
-        val bankedToday: Int
+        var bankedToday: Int
 ) : Parcelable, AnkoLogger {
 
     constructor() : this(null, 0.0, hashMapOf<String, Coin>(), mutableSetOf(), mutableListOf(), 0)

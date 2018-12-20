@@ -3,7 +3,6 @@
     <string name="mapbox_access_token" translatable="false">pk.eyJ1Ijoiam1haW8iLCJhIjoiY2ptZmE3ZTFtNjk0cDNrcXZzYjI3ZjNyNiJ9.JczgAMs4tnWXbW8cbVKpaA</string>
     <string name="mapbox_style_coinz" translatable="false">mapbox://styles/jmaio/cjmi1329anoq22sqt6z3fkw2m</string>
     <string name="preferences_file" translatable="false">coinz_prefs</string>
-    <string name="action_settings">Settings</string>
     <string name="curr_shil">SHIL</string>
     <string name="curr_dolr">DOLR</string>
     <string name="curr_quid">QUID</string>
@@ -33,5 +32,5 @@
     <string name="coins_collected">Coins collected</string>
     <string name="coins_collected_progress">%1$d / 50</string>
     <string name="title_activity_bank">Coinz Bank</string>
-    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_leaderboard">Leaderboard</string>
 </resources>

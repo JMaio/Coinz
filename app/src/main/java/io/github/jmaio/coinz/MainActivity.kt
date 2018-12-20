@@ -407,7 +407,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         info("clicked $item, id: ${item?.itemId}")
         when (item!!.itemId) {
-            R.id.app_bar_settings -> startActivity(Intent(this, SettingsActivity::class.java))
+            R.id.app_bar_settings -> startActivity(Intent(this, LeaderboardActivity::class.java))
         }
         return true
     }

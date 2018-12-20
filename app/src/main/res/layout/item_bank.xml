@@ -8,9 +8,11 @@
     android:layout_marginRight="6dp"
     android:layout_marginBottom="6dp"
     android:layout_weight="1"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"
     app:cardElevation="2dp"
-    app:contentPadding="12dp"
-    app:contentPaddingLeft="16dp"
+    app:contentPadding="8dp"
+    app:contentPaddingLeft="32dp"
     app:contentPaddingRight="16dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -24,25 +26,25 @@
             android:drawableTop="@drawable/marker_dolr"
             android:drawablePadding="-6dp"
             android:gravity="center_vertical"
-            android:text="DOLR"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="DOLR" />
 
         <TextView
             android:id="@+id/bank_curr_units"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="value display"
+            android:text=""
             android:textAppearance="@android:style/TextAppearance.Material.Headline"
             android:typeface="monospace"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/bank_curr_text"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="8" />
+            tools:text="1" />
 
         <!--<TextView-->
         <!--android:id="@+id/bank_curr_units"-->
@@ -95,9 +97,19 @@
             android:textAppearance="@android:style/TextAppearance.Material.Large"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.43"
+            app:layout_constraintHorizontal_bias="0.4"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/bank_item_gold_ic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/bank_conv_approx"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_monetization_on_24dp" />
 
         <TextView
             android:id="@+id/bank_gold_units"
@@ -126,26 +138,12 @@
             android:id="@+id/bank_gold_dec"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="00"
+            android:layout_marginEnd="8dp"
+            android:text="000"
             android:textAppearance="@android:style/TextAppearance.Material.Medium"
             android:typeface="monospace"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/gold_symbol"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/gold_symbol"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:text="G"
-            android:textAppearance="@android:style/TextAppearance.Material.Large"
-            android:textColor="@color/colorQuid"
-            android:typeface="serif"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/divider"
+            app:layout_constraintEnd_toStartOf="@+id/divider"
             app:layout_constraintTop_toTopOf="parent" />
 
         <View

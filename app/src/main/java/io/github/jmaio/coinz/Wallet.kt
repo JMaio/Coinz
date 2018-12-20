@@ -107,6 +107,16 @@ data class Wallet(
         info("[addCoinToWallet] method complete")
     }
 
+    fun incrementBankedToday() {
+        if (id != null) {
+            bankedToday++
+            walletCollection.document(id)
+                    .update("bankedToday", bankedToday)
+                    .addOnSuccessListener { info("successfully incremented bankedToday for $id") }
+                    .addOnFailureListener { info("could not incremented bankedToday for $id") }
+        }
+    }
+
     // exchange a coin for its gold value
     fun bankCoin(coin: Coin) {
         if (bankedToday < 25) {

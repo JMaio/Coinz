@@ -10,7 +10,7 @@ import org.jetbrains.anko.info
 @Parcelize
 data class Wallet(
         val id: String?,
-        val gold: Double,
+        var gold: Double,
         val coins: HashMap<String, Coin>,
         var ids: MutableSet<String>,
         val ordered: MutableList<Coin>,
@@ -50,15 +50,16 @@ data class Wallet(
 
     fun availableCoins(): List<Coin> {
         return coins.filterValues { c -> !c.gone }.values.toList()
-//        return null
     }
 
     private fun addGold(amount: Double) {
-        if (id != null)
+        if (id != null) {
+            gold += amount
             walletCollection.document(id)
                     .update("gold", gold + amount)
                     .addOnSuccessListener { info("successfully added $amount gold to $id's wallet") }
                     .addOnFailureListener { e -> info("could not add $amount gold to  $id's wallet - $e") }
+        }
     }
 
     // collect coin from map

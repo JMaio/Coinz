@@ -123,17 +123,26 @@ data class Wallet(
         if (coin.gone) throw Exception("You don't have this coin anymore!")
         info("[donateCoin] coin is ${coin.value}, ${coin.currency}")
 
-        val rate = rates.toMap()[coin.currency] ?: throw Exception("Exchange rate error")
+//        val rate = rates.toMap()[coin.currency] ?: throw Exception("Exchange rate error")
         walletStore.getWallet(walletID) { w ->
             if (w == null) callback(null)
             else {
-                val g = coin.value * rate
+                val g = coinGoldValue(coin, rates)
                 removeCoinFromWallet(coin)
                 w.addGold(g)
                 callback(g)
             }
         }
 //        return g
+    }
+
+    fun coinGoldValue(coin: Coin, rates: Rates?): Double {
+        var g = .0
+        if (rates != null) {
+            val rate = rates.toMap()[coin.currency] ?: throw Exception("Exchange rate error")
+            g = coin.value * rate
+        }
+        return g
     }
 
 }

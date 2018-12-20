@@ -356,7 +356,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         bottom_app_bar.setNavigationOnClickListener {
             walletStore.getWallet(user) { w ->
                 wallet = w
-                startActivity(Intent(this, BankActivity::class.java).putExtra("wallet", wallet))
+                startActivity(Intent(this, BankActivity::class.java)
+                        .putExtra("wallet", wallet)
+                        .putExtra("rates", rates))
             }
         }
 

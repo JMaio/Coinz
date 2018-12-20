@@ -105,9 +105,9 @@
             android:id="@+id/bank_item_gold_ic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginEnd="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/bank_conv_approx"
+            app:layout_constraintEnd_toStartOf="@+id/bank_gold_units"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_monetization_on_24dp" />
 
@@ -163,7 +163,7 @@
             android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:paddingHorizontal="12dp"
-            android:src="@drawable/ic_archive_black_24dp"
+            android:src="@drawable/ic_play_for_work_black_24dp"
             android:tint="@color/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

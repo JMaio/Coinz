@@ -37,7 +37,7 @@
         android:paddingVertical="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/banked_text">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/shil_card"
@@ -307,6 +307,49 @@
 
         </androidx.cardview.widget.CardView>
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/bank_day_progressbar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:progress="0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/bank_div"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toBottomOf="@+id/banked_text"
+        app:layout_constraintEnd_toStartOf="@+id/bank_progress_text"
+        app:layout_constraintStart_toEndOf="@+id/banked_text"
+        app:layout_constraintTop_toTopOf="@+id/banked_text" />
+
+    <TextView
+        android:id="@+id/banked_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:text="@string/coins_banked"
+        android:textAppearance="@android:style/TextAppearance.Material.Button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/bank_progress_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/coins_banked_progress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.chip.Chip
         android:id="@+id/bank_gold_chip"

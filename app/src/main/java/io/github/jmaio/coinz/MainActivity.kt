@@ -49,9 +49,15 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     private var penySource: GeoJsonSource? = null
     private var geoJsonSources = mutableMapOf<String, GeoJsonSource?>()
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
-    private lateinit var user: FirebaseUser
+    // Initialize Firebase Auth
+    private var auth = FirebaseAuth.getInstance()
+    private var db = FirebaseFirestore.getInstance().apply {
+        firestoreSettings = FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build()
+    }
+    val user = auth.currentUser
+
     private var wallet = Wallet()
     private var walletStore = WalletStore()
     private var userDisplay = "defaultUser"
@@ -73,13 +79,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Initialize Firebase Auth
-        auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance().apply {
-            firestoreSettings = FirebaseFirestoreSettings.Builder()
-                    .setTimestampsInSnapshotsEnabled(true)
-                    .build()
-        }
+
         // Mapbox access token is configured here. This needs to be called either in your application
         // object or in the same activity which contains the mapview.
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
@@ -175,12 +175,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         super.onStart()
         // set currently signed-in user and display it
         auth.currentUser.let { u ->
-            if (u != null)
-                user = u
             u?.email.let { e ->
-                if (e != null)
+                if (e != null) {
                     userDisplay = e
-                user_id_chip.text = e
+                }
+                user_id_chip.text = userDisplay
             }
         }
 
@@ -264,6 +263,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         }
 
         // get this user's wallet as a basis for populating the map
+        if (user != null)
         walletStore.getWallet(user) { w ->
             wallet = w
             if (!sameDate) {
@@ -347,6 +347,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
     private fun createOnClickListeners() {
         fab.setOnClickListener {
+            if (user != null)
             walletStore.getWallet(user) { w ->
                 wallet = w
                 startActivity(Intent(this, WalletActivity::class.java)
@@ -357,6 +358,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         }
 
         bottom_app_bar.setNavigationOnClickListener {
+            if (user != null)
             walletStore.getWallet(user) { w ->
                 wallet = w
                 startActivity(Intent(this, BankActivity::class.java)

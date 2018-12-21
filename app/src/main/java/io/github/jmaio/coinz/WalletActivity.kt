@@ -41,7 +41,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             wallet_day_progressbar.progress = (p * 2)
 
             wallet.gold.toString().split('.').let { (u, d) ->
-                gold_chip.text = getString(R.string.value_display, u, d.take(6))
+                wallet_gold_chip.text = getString(R.string.value_display, u, d.take(6))
             }
 
             viewAdapter = WalletAdapter(wallet, rates)
@@ -106,10 +106,10 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             // - replace the contents of the view with that element
             val coin = wallet.availableCoins()[position]
             val drawables = mapOf(
-                    Pair("shil", R.drawable.marker_shil),
-                    Pair("dolr", R.drawable.marker_dolr),
-                    Pair("quid", R.drawable.marker_quid),
-                    Pair("peny", R.drawable.marker_peny)
+                    "shil" to R.drawable.marker_shil,
+                    "dolr" to R.drawable.marker_dolr,
+                    "quid" to R.drawable.marker_quid,
+                    "peny" to R.drawable.marker_peny
             )
             holder.apply {
                 curr.apply {
@@ -119,57 +119,56 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                 coin.value.toString().split('.').let { (u, d) ->
                     currUnits.text = u
                     currDec.text = d.take(6)
+
                 }
-                if (!coin.gone) {
-                    button.setOnClickListener { v ->
-                        if (rates != null) {
-                            lateinit var dialog: DialogInterface
-                            dialog = v.context.alert {
-                                title = "Sending ${coin.currency} (${coin.value.toString().take(8)})"
-                                message = "Please specify the username of the receiver:"
-                                customView {
-                                    verticalLayout {
-                                        val receiver = editText {
-                                            hint = "Receiver username"
-                                        }.lparams(width = matchParent) {
-                                            horizontalPadding = dip(32)
-                                        }
-                                        button("Send") {
-                                            onClick {
-                                                info("[donateCoin] wallet is ${wallet.toString().take(100)}")
-                                                val recv = receiver.text.toString()
-                                                if (recv.isBlank()) ctx.toast("Please enter a valid username")
-                                                else {
-                                                    try {
-                                                        wallet.donateCoin(coin.id, recv, rates) { g ->
-                                                            info("sending coin $coin")
-                                                            if (g == null) {
-                                                                ctx.longToast("Could not send this coin!")
-                                                            } else {
-                                                                notifyItemRemoved(position)
-                                                                ctx.longToast("sending ${g.toString().take(7)} Gold to ${receiver.text}")
-                                                            }
+//                if (!coin.gone) {
+                button.setOnClickListener { v ->
+                    if (rates != null) {
+                        lateinit var dialog: DialogInterface
+                        dialog = v.context.alert {
+                            title = "Sending ${coin.currency} (${coin.value.toString().take(8)})"
+                            message = "Please specify the username of the receiver:"
+                            customView {
+                                verticalLayout {
+                                    val receiver = editText { hint = "Receiver username" }
+                                            .lparams(width = matchParent) {
+                                                horizontalPadding = dip(32)
+                                            }
+                                    button("Send") {
+                                        onClick {
+                                            info("[donateCoin] wallet is ${wallet.toString().take(100)}")
+                                            val recv = receiver.text.toString().trim()
+                                            if (recv.isBlank()) ctx.toast("Please enter a valid username")
+                                            else {
+                                                try {
+                                                    wallet.donateCoin(coin.id, recv, rates) { g ->
+                                                        info("sending coin $coin")
+                                                        if (g == null) {
+                                                            ctx.longToast("Could not send this coin!")
+                                                        } else {
+                                                            notifyItemRemoved(holder.adapterPosition)
+                                                            ctx.longToast("Sending ${g.toString().take(7)} Gold to ${receiver.text}")
                                                         }
-                                                    } catch (e: Exception) {
-                                                        info("[donateCoin] -- exception ${e.message}")
-                                                        ctx.longToast(e.message.toString())
-                                                    } finally {
-                                                        dialog.dismiss()
-                                                        info("[donateCoin] dialog dismissed")
                                                     }
+                                                } catch (e: Exception) {
+                                                    info("[donateCoin] -- exception ${e.message}")
+                                                    ctx.longToast(e.message.toString())
+                                                } finally {
+                                                    dialog.dismiss()
+                                                    info("[donateCoin] dialog dismissed")
                                                 }
                                             }
-                                        }.lparams(width = wrapContent) {
-                                            gravity = Gravity.CENTER
                                         }
+                                    }.lparams(width = wrapContent) {
+                                        gravity = Gravity.CENTER
                                     }
                                 }
-                            }.show()
-                        } else {
-                            v.indefiniteSnackbar("Exchange rates missing! Please wait until the map has been downloaded and try again.").show()
-                        }
+                            }
+                        }.show()
+                    } else {
+                        v.indefiniteSnackbar("Exchange rates missing! Please wait until the map has been downloaded and try again.").show()
                     }
-                } else {
+//                } else {
 //                    button.apply {
 //                        isClickable = false
 //                        isEnabled = false

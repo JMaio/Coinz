@@ -250,8 +250,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         val today = LocalDateTime.now()
         val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
 
+        val sameDate = dateString == downloadDate
+
         // if map is already today's map
-        if (dateString == downloadDate && !coinzDebugMode && !force) {
+        if (sameDate && !coinzDebugMode && !force) {
             info("[fetchCoinMap]: dateString = $dateString = downloadDate - loading...")
         } else {
             // make url from date pattern
@@ -266,6 +268,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         // get this user's wallet as a basis for populating the map
         walletStore.getWallet(user) { w ->
             wallet = w
+            if (!sameDate) { wallet.resetWalletNextDay() }
             val maker = CoinMapMaker(w)
             doAsync {
                 coinMap = maker.loadMapFromFile(coinzmapFile)
@@ -356,7 +359,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         bottom_app_bar.setNavigationOnClickListener {
             walletStore.getWallet(user) { w ->
                 wallet = w
-                startActivity(Intent(this, BankActivity::class.java).putExtra("wallet", wallet))
+                startActivity(Intent(this, BankActivity::class.java)
+                        .putExtra("wallet", wallet)
+                        .putExtra("rates", rates))
             }
         }
 
@@ -365,7 +370,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         // map markers
         buttons.forEach { btn ->
             btn.setOnCheckedChangeListener { _, isChecked ->
-                toast("${btn.text} was pressed, now $isChecked")
+                //                toast("${btn.text} was pressed, now $isChecked")
                 debug("[coinButton] button '$btn' pressed --> $isChecked")
                 if (isChecked) {
                     showMarkers(btn.text.toString())
@@ -405,7 +410,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         info("clicked $item, id: ${item?.itemId}")
         when (item!!.itemId) {
-            R.id.app_bar_settings -> startActivity(Intent(this, SettingsActivity::class.java))
+            R.id.app_bar_settings -> startActivity(Intent(this, LeaderboardActivity::class.java))
         }
         return true
     }

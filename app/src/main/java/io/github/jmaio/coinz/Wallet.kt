@@ -93,7 +93,7 @@ data class Wallet(
                         .set(coins, SetOptions.merge())
 //                    .whereEqualTo("id", coin.id).get()
                         .addOnCompleteListener { t ->
-                            if (t.isSuccessful) coins[coin.id!!] = coin.apply { gone = true }
+                            if (t.isSuccessful) coins[coin.id] = coin.apply { gone = true }
                             info("[removeCoinFromWallet] ${t.isSuccessful} ${t.result}")
                         }
 
@@ -118,11 +118,15 @@ data class Wallet(
     }
 
     // exchange a coin for its gold value
-    fun bankCoin(coin: Coin) {
-        if (bankedToday < 25) {
-
+    fun bankCoin(coin: Coin, rates: Rates, callback: (Double?) -> Unit) {
+        if (bankedToday < 25 && !coin.gone) {
+            val g = coinGoldValue(coin, rates)
+            removeCoinFromWallet(coin)
+            incrementBankedToday()
+            addGold(g)
+            callback(g)
         } else {
-
+            throw Exception("Coin banking limit exceeded!")
         }
     }
 

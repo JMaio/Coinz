@@ -146,7 +146,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                                                         if (g == null) {
                                                             ctx.longToast("Could not send this coin!")
                                                         } else {
-                                                            notifyItemRemoved(position)
+                                                            notifyItemRemoved(holder.adapterPosition)
                                                             ctx.longToast("Sending ${g.toString().take(7)} Gold to ${receiver.text}")
                                                         }
                                                     }

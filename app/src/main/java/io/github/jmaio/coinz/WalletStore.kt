@@ -3,6 +3,7 @@ package io.github.jmaio.coinz
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.Query
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -12,6 +13,18 @@ class WalletStore : AnkoLogger {
         firestoreSettings = FirebaseFirestoreSettings.Builder()
                 .setTimestampsInSnapshotsEnabled(true)
                 .build()
+    }
+
+    fun getTopWallets(n: Long, callback: (List<Wallet>?) -> Unit) {
+        db.collection("wallets").orderBy("gold", Query.Direction.DESCENDING).limit(n).get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val l = task.result?.toObjects(Wallet::class.java)
+                        callback(l)
+                    } else {
+                        callback(null)
+                    }
+                }
     }
 
     fun getWallet(user: FirebaseUser, callback: (Wallet) -> Unit) {

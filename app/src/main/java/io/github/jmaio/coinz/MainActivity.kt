@@ -367,7 +367,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         // map markers
         buttons.forEach { btn ->
             btn.setOnCheckedChangeListener { _, isChecked ->
-                toast("${btn.text} was pressed, now $isChecked")
+                //                toast("${btn.text} was pressed, now $isChecked")
                 debug("[coinButton] button '$btn' pressed --> $isChecked")
                 if (isChecked) {
                     showMarkers(btn.text.toString())

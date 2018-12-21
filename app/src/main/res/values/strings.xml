@@ -31,6 +31,8 @@
     <string name="value_display"><big>%1$s</big>.<small>%2$s</small></string>
     <string name="coins_collected">Coins collected</string>
     <string name="coins_collected_progress">%1$d / 50</string>
+    <string name="coins_banked">Coins banked</string>
+    <string name="coins_banked_progress">%1$d / 25</string>
     <string name="title_activity_bank">Coinz Bank</string>
     <string name="title_activity_leaderboard">Leaderboard</string>
 </resources>

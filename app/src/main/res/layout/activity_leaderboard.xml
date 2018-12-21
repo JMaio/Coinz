@@ -6,4 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".LeaderboardActivity">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/leaderboard_items_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        tools:listitem="@layout/item_leaderboard" />
 </androidx.constraintlayout.widget.ConstraintLayout>

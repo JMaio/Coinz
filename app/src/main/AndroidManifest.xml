@@ -46,18 +46,9 @@
             android:label="@string/title_activity_bank"
             android:theme="@style/CoinzActionBar" />
         <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:theme="@style/CoinzActionBar" />
-        <activity
             android:name=".LeaderboardActivity"
             android:label="@string/title_activity_leaderboard"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.github.jmaio.coinz.MainActivity" />
-        </activity>
+            android:theme="@style/CoinzActionBar" />
     </application>
 
 </manifest>

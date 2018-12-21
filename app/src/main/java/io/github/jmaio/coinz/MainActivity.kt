@@ -250,8 +250,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         val today = LocalDateTime.now()
         val dateString = DateTimeFormatter.ofPattern("yyyy/MM/dd", Locale.ENGLISH).format(today)
 
+        val sameDate = dateString == downloadDate
+
         // if map is already today's map
-        if (dateString == downloadDate && !coinzDebugMode && !force) {
+        if (sameDate && !coinzDebugMode && !force) {
             info("[fetchCoinMap]: dateString = $dateString = downloadDate - loading...")
         } else {
             // make url from date pattern
@@ -266,6 +268,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         // get this user's wallet as a basis for populating the map
         walletStore.getWallet(user) { w ->
             wallet = w
+            if (!sameDate) { wallet.resetWalletNextDay() }
             val maker = CoinMapMaker(w)
             doAsync {
                 coinMap = maker.loadMapFromFile(coinzmapFile)

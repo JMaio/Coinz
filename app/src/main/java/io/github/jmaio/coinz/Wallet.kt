@@ -28,7 +28,7 @@ data class Wallet(
     val ids: Set<String>
         get() = coins.keys
 
-    fun getCoin(id: String): Coin? {
+    private fun getCoin(id: String): Coin? {
         info("[getCoin] returning ${coins[id]} for id = $id")
         return coins[id]
     }
@@ -66,14 +66,13 @@ data class Wallet(
         info("[addCoinToWallet] method complete")
     }
 
-    fun removeCoinFromWallet(coin: Coin) {
+    private fun removeCoinFromWallet(coin: Coin) {
         if (id != null) {
             if (coin.id in coins && !coin.gone) {
                 val coins = hashMapOf<String, Any?>(
                         "coins" to coin.apply { gone = true }.toMap()
                 )
                 info("[removeCoinFromWallet] this wallet has id = $id")
-                val w = walletCollection.document(id)
                 walletCollection.document(id)
                         .set(coins, SetOptions.merge())
 //                    .whereEqualTo("id", coin.id).get()
@@ -85,24 +84,15 @@ data class Wallet(
 //            info("[removeCoinFromWallet] -- w = ${w.result} ")
             }
         }
-//                .update("coins", FieldValue.arrayRemove(coin.id))
-//                .addOnSuccessListener { info("successfully removed coin ${coin.id} from $id's wallet") }
-//                .addOnFailureListener { e -> info("could not remove coin ${coin.id} from $id's wallet - $e") }
 
         info("[addCoinToWallet] method complete")
     }
 
-    fun incrementBankedToday() {
-        if (id != null) {
-            bankedToday++
-            walletCollection.document(id)
-                    .update("bankedToday", bankedToday)
-                    .addOnSuccessListener { info("successfully incremented bankedToday for $id") }
-                    .addOnFailureListener { info("could not incremented bankedToday for $id") }
-        }
+    private fun incrementBankedToday() {
+        updateBankedToday(++bankedToday)
     }
 
-    fun resetBankedToday(q: Int) {
+    private fun updateBankedToday(q: Int) {
         if (id != null) {
             bankedToday = q
             walletCollection.document(id)
@@ -133,7 +123,6 @@ data class Wallet(
         if (coin.gone) throw Exception("You don't have this coin anymore!")
         info("[donateCoin] coin is ${coin.value}, ${coin.currency}")
 
-//        val rate = rates.toMap()[coin.currency] ?: throw Exception("Exchange rate error")
         walletStore.getWallet(walletID) { w ->
             if (w == null) callback(null)
             else {
@@ -145,11 +134,11 @@ data class Wallet(
         }
     }
 
-    fun resetCoins() {
+    private fun resetCoins() {
         if (id != null) {
-            val coins = hashMapOf<String, Any?>("coins" to emptyMap<String, Any?>())
+            val empty = hashMapOf<String, Any?>("coins" to emptyMap<String, Any?>())
             walletCollection.document(id)
-                    .set(coins)
+                    .update(empty)
                     .addOnSuccessListener { info("successfully reset coins for $id's wallet") }
                     .addOnFailureListener { e -> info("could not reset coins for $id's wallet - $e") }
         }
@@ -166,7 +155,7 @@ data class Wallet(
     }
 
     fun resetWalletNextDay() {
-        resetBankedToday(0)
+        updateBankedToday(0)
         resetCoins()
     }
 

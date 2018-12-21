@@ -137,7 +137,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                                     button("Send") {
                                         onClick {
                                             info("[donateCoin] wallet is ${wallet.toString().take(100)}")
-                                            val recv = receiver.text.toString()
+                                            val recv = receiver.text.toString().trim()
                                             if (recv.isBlank()) ctx.toast("Please enter a valid username")
                                             else {
                                                 try {

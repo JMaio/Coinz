@@ -41,7 +41,7 @@ data class Wallet(
         if (id != null) {
             gold += amount
             walletCollection.document(id)
-                    .update("gold", gold + amount)
+                    .update("gold", gold)
                     .addOnSuccessListener { info("successfully added $amount gold to $id's wallet") }
                     .addOnFailureListener { e -> info("could not add $amount gold to  $id's wallet - $e") }
         }

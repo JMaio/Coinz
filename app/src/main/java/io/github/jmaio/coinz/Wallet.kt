@@ -12,13 +12,12 @@ data class Wallet(
         val id: String?,
         var gold: Double,
         val coins: HashMap<String, Coin>,
-        var ids: MutableSet<String>,
         val ordered: MutableList<Coin>,
         var bankedToday: Int
 ) : Parcelable, AnkoLogger {
 
-    constructor() : this(null, 0.0, hashMapOf<String, Coin>(), mutableSetOf(), mutableListOf(), 0)
-    constructor(id: String?, w: Wallet) : this(id, w.gold, w.coins, w.ids, w.ordered, w.bankedToday)
+    constructor() : this(null, 0.0, hashMapOf<String, Coin>(), mutableListOf(), 0)
+    constructor(id: String?, w: Wallet) : this(id, w.gold, w.coins, w.ordered, w.bankedToday)
 
     @IgnoredOnParcel
     private val walletStore = WalletStore()
@@ -26,22 +25,8 @@ data class Wallet(
     private val walletCollection = walletStore.db.collection("wallets")
     val size get() = coins.size
 
-    fun init() {
-        this.apply {
-            setIds()
-            setOrdered()
-        }
-    }
-
-    fun setIds() {
-        coins.forEach { id, c ->
-            ids.add(id)
-        }
-    }
-
-    fun setOrdered() {
-
-    }
+    val ids: Set<String>
+        get() = coins.keys
 
     fun getCoin(id: String): Coin? {
         info("[getCoin] returning ${coins[id]} for id = $id")
@@ -148,8 +133,18 @@ data class Wallet(
                 callback(g)
             }
         }
-//        return g
     }
+
+    fun resetCoins() {
+        if (id != null) {
+            val coins = hashMapOf<String, Any?>("coins" to emptyMap<String, Any?>())
+            walletCollection.document(id)
+                    .set(coins)
+                    .addOnSuccessListener { info("successfully reset coins for $id's wallet") }
+                    .addOnFailureListener { e -> info("could not reset coins for $id's wallet - $e") }
+        }
+    }
+
 
     fun coinGoldValue(coin: Coin, rates: Rates?): Double {
         var g = .0
@@ -158,6 +153,11 @@ data class Wallet(
             g = coin.value * rate
         }
         return g
+    }
+
+    fun resetWalletNextDay() {
+        resetBankedToday(0)
+        resetCoins()
     }
 
 }

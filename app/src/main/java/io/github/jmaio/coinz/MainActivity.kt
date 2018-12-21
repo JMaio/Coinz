@@ -122,16 +122,17 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
                     addImage("marker_${c.toLowerCase()}", icon)
                 }
 
-                addOnMapClickListener { l ->
-                    val screenPoint = projection.toScreenLocation(l)
-                    val features = queryRenderedFeatures(screenPoint,
-                            "shil_layer", "dolr_layer", "quid_layer", "peny_layer")
-                    if (!features.isEmpty()) {
-                        val selectedFeature = features[0]
-                        val id = selectedFeature.getStringProperty("id")
-                        collectCoinFromMapDebug(id)
-                    }
-                }
+                // this was a debug feature to allow collection of a coin simply by clicking
+//                addOnMapClickListener { l ->
+//                    val screenPoint = projection.toScreenLocation(l)
+//                    val features = queryRenderedFeatures(screenPoint,
+//                            "shil_layer", "dolr_layer", "quid_layer", "peny_layer")
+//                    if (!features.isEmpty()) {
+//                        val selectedFeature = features[0]
+//                        val id = selectedFeature.getStringProperty("id")
+//                        collectCoinFromMapDebug(id)
+//                    }
+//                }
             }
 
             val locationComponentOptions = LocationComponentOptions.builder(this)
@@ -230,6 +231,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     override fun onConnected() {}
 
     override fun onLocationChanged(location: Location?) {
+        // create copy to prevent concurrent modification exception
         val closeCoins = arrayListOf<WildCoin>()
         coinMap?.coins?.forEach { wildCoin ->
             if (wildCoin.asLatLng().distanceTo(LatLng(location)) < 25) {

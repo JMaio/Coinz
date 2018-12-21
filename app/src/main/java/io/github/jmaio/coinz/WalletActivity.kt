@@ -53,16 +53,12 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
             setHasFixedSize(true)
-
             // use a linear layout manager
             layoutManager = viewManager
-
             // specify an viewAdapter (see also next example)
             adapter = viewAdapter
-
             // add click listeners?
         }
-
     }
 
     class WalletAdapter(private val wallet: Wallet, private val rates: Rates?) :
@@ -87,7 +83,6 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             }
         }
 
-
         // Create new views (invoked by the layout manager)
         override fun onCreateViewHolder(parent: ViewGroup,
                                         viewType: Int): WalletAdapter.WalletViewHolder {
@@ -95,8 +90,6 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
             val itemView = LayoutInflater.from(parent.context)
                     .inflate(R.layout.item_wallet, parent, false) as View
             // set the view's size, margins, padding and layout parameters
-
-
             return WalletViewHolder(itemView)
         }
 
@@ -121,7 +114,7 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                     currDec.text = d.take(6)
 
                 }
-//                if (!coin.gone) {
+                // handle send button click logic fully within this component
                 button.setOnClickListener { v ->
                     if (rates != null) {
                         lateinit var dialog: DialogInterface
@@ -168,11 +161,6 @@ class WalletActivity : AppCompatActivity(), AnkoLogger {
                     } else {
                         v.indefiniteSnackbar("Exchange rates missing! Please wait until the map has been downloaded and try again.").show()
                     }
-//                } else {
-//                    button.apply {
-//                        isClickable = false
-//                        isEnabled = false
-//                    }
                 }
             }
         }

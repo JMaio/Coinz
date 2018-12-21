@@ -43,9 +43,9 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
         }
 
         // bypass login for testing
-        text_welcome.setOnClickListener {
-            gotoMain()
-        }
+//        text_welcome.setOnClickListener {
+//            gotoMain()
+//        }
 
         sign_in_button.setOnClickListener { view ->
             info("[login] email '${email_input.text}', password length = ${password_input.text.length}")
@@ -77,7 +77,6 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
     private fun gotoMain() {
         val intent = Intent(this, MainActivity::class.java)
         // try to pass the id of the current user - otherwise, pass "defaultUser"
-//        intent.putExtra("id", if (fbAuth.currentUser?.email != null) fbAuth.currentUser?.email else "defaultUser")
         startActivity(intent)
         this.finish()
     }
@@ -142,11 +141,10 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
                 }
     }
 
-    fun areLocationPermissionsGranted(): Boolean =
+    private fun areLocationPermissionsGranted(): Boolean =
             ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
-
-    fun enableLocationPermissions() {
+    private fun enableLocationPermissions() {
         if (areLocationPermissionsGranted()) {
             info("[enableLocation] Location Permission [ON]")
         } else {
@@ -173,6 +171,4 @@ class LoginActivity : AppCompatActivity(), AnkoLogger, PermissionsListener {
             }.show()
         }
     }
-
-
 }

@@ -72,17 +72,7 @@ data class CoinMap(var coins: MutableList<WildCoin>,
                    var features: String) : Parcelable, AnkoLogger {
 
     fun collectCoin(wildCoin: WildCoin) {
-        // find the coin by id
-//        val wildCoin = coins.find { coin ->
-//            coin.properties.id == id
-//        }
-        val collectedCoin = Coin(
-                wildCoin.properties.id,
-                wildCoin.properties.currency,
-                wildCoin.properties.value
-        )
-        // add to firebase wallet as collected
-        //
+        // remove coin from map
         try {
             coins.remove(wildCoin)
             info("removed coin $wildCoin")
@@ -103,7 +93,6 @@ data class CoinMap(var coins: MutableList<WildCoin>,
     }
 
     fun toGeoJson(c: String): FeatureCollection {
-//        updateFeatures()
         val currCoins = Gson().toJson(coins.filter { coin -> coin.properties.currency.toLowerCase() == c })
 
         val featureCollection = ArrayList<Feature>()
@@ -114,17 +103,12 @@ data class CoinMap(var coins: MutableList<WildCoin>,
         info("[toGeoJson] new $c map: (${featureCollection.size}) ${featureCollection.toString().take(100)}...")
 
         return FeatureCollection.fromFeatures(featureCollection)
-
-//        return GeoJsonSource(
-//                "${c.toLowerCase()}_source",
-//                FeatureCollection.fromFeatures(featureCollection)
-//        )
     }
 }
 
 
 // class to keep maps of coins per day
-class CoinMapMaker(var wallet: Wallet) : AnkoLogger {
+class CoinMapMaker(private var wallet: Wallet) : AnkoLogger {
     private val gson = Gson()
 
     fun loadMapFromFile(file: String): CoinMap? {
@@ -148,10 +132,8 @@ class CoinMapMaker(var wallet: Wallet) : AnkoLogger {
                     features.toString()
             )
 
-
             info("[loadMapFromFile] : GeoJSON contains ${features.size()} features")
             val allCoins = mutableListOf<WildCoin>()
-//            val collectedCoins = db
             info("wallet: ${wallet.toString().take(100)}...")
 
             for (i in 0 until features.size()) {
@@ -163,7 +145,6 @@ class CoinMapMaker(var wallet: Wallet) : AnkoLogger {
                 val wildCoin = WildCoin(props, geometry)
                 allCoins.add(wildCoin)
                 // don't add this coin if it has already been collected!!
-//                info("[coinMap] adding ${wildCoin.properties.id}")
                 if (wildCoin.properties.id !in wallet.ids) {
                     coinMap.coins.add(wildCoin)
                 }

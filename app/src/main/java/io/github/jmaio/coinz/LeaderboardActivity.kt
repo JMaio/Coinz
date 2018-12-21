@@ -1,5 +1,6 @@
 package io.github.jmaio.coinz
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +16,7 @@ import org.jetbrains.anko.padding
 
 class LeaderboardActivity : AppCompatActivity(), AnkoLogger {
 
-    val walletStore = WalletStore()
+    private val walletStore = WalletStore()
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -43,7 +44,6 @@ class LeaderboardActivity : AppCompatActivity(), AnkoLogger {
 
     class LeaderboardAdapter(private val wallets: List<Wallet>) :
             RecyclerView.Adapter<LeaderboardAdapter.LeaderboardViewHolder>(), AnkoLogger {
-
         // Provide a reference to the views for each data item
         // Complex data items may need more than one view per item, and
         // you provide access to all the views for a data item in a view holder.
@@ -66,6 +66,7 @@ class LeaderboardActivity : AppCompatActivity(), AnkoLogger {
         }
 
         // Replace the contents of a view (invoked by the layout manager)
+        @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: LeaderboardViewHolder, position: Int) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
@@ -81,7 +82,5 @@ class LeaderboardActivity : AppCompatActivity(), AnkoLogger {
 
         // Return the size of your dataset (invoked by the layout manager)
         override fun getItemCount() = wallets.size
-
     }
-
 }

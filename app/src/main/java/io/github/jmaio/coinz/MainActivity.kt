@@ -172,7 +172,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     @SuppressWarnings("MissingPermission")
     override fun onStart() {
         super.onStart()
-
         // set currently signed-in user and display it
         auth.currentUser.let { u ->
             if (u != null)
@@ -188,7 +187,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         // use ”” as the default value (this might be the first time the app is run)
         downloadDate = settings.getString("lastDownloadDate", "")
         info("[onStart] last map load date = '$downloadDate'")
-
         mapView?.onStart()
     }
 
@@ -229,9 +227,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     }
 
     @SuppressLint("MissingPermission")
-    override fun onConnected() {
-//        locationComponent.locationEngine?.requestLocationUpdates()
-    }
+    override fun onConnected() {}
 
     override fun onLocationChanged(location: Location?) {
         val closeCoins = arrayListOf<WildCoin>()
@@ -268,7 +264,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         // get this user's wallet as a basis for populating the map
         walletStore.getWallet(user) { w ->
             wallet = w
-            if (!sameDate) { wallet.resetWalletNextDay() }
+            if (!sameDate) {
+                wallet.resetWalletNextDay()
+            }
             val maker = CoinMapMaker(w)
             doAsync {
                 coinMap = maker.loadMapFromFile(coinzmapFile)
@@ -337,7 +335,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
 
     private fun collectCoinFromMapDebug(id: String) {
         try {
-            val coin = coinMap!!.getCoinByID(id)!! // coinMap!!.coins.find { wildCoin -> wildCoin.properties.id == id }!!
+            val coin = coinMap!!.getCoinByID(id)!!
             info("[collectCoinFromMap] collecting coin $id - $coin")
             collectCoinFromMap(coin)
         } catch (e: Exception) {
@@ -370,7 +368,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
         // map markers
         buttons.forEach { btn ->
             btn.setOnCheckedChangeListener { _, isChecked ->
-                //                toast("${btn.text} was pressed, now $isChecked")
                 debug("[coinButton] button '$btn' pressed --> $isChecked")
                 if (isChecked) {
                     showMarkers(btn.text.toString())
@@ -410,7 +407,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger, LocationEngineListener {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         info("clicked $item, id: ${item?.itemId}")
         when (item!!.itemId) {
-            R.id.app_bar_settings -> startActivity(Intent(this, LeaderboardActivity::class.java))
+            R.id.app_bar_leaderboard -> startActivity(Intent(this, LeaderboardActivity::class.java))
         }
         return true
     }

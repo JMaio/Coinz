@@ -56,7 +56,6 @@ data class Wallet(
             )
             walletCollection.document(id)
                     .set(coins, SetOptions.merge())
-//                    .update("coins", FieldValue.arrayUnion(wildCoin.toCoin().toMap()))
                     .addOnSuccessListener {
                         coins[wildCoin.properties.id] = wildCoin.toCoin()
                         info("successfully added coin ${wildCoin.properties.id} to $id's wallet")
@@ -75,16 +74,12 @@ data class Wallet(
                 info("[removeCoinFromWallet] this wallet has id = $id")
                 walletCollection.document(id)
                         .set(coins, SetOptions.merge())
-//                    .whereEqualTo("id", coin.id).get()
                         .addOnCompleteListener { t ->
                             if (t.isSuccessful) coins[coin.id] = coin.apply { gone = true }
                             info("[removeCoinFromWallet] ${t.isSuccessful} ${t.result}")
                         }
-
-//            info("[removeCoinFromWallet] -- w = ${w.result} ")
             }
         }
-
         info("[addCoinToWallet] method complete")
     }
 
@@ -118,7 +113,6 @@ data class Wallet(
     // transfer a coin to another player
     fun donateCoin(coinID: String, walletID: String, rates: Rates, callback: (Double?) -> Unit) {
         if (walletID == id) throw Exception("You can't send coins to yourself!")
-//        var g =.0
         val coin = getCoin(coinID) ?: throw Exception("You don't have this coin!")
         if (coin.gone) throw Exception("You don't have this coin anymore!")
         info("[donateCoin] coin is ${coin.value}, ${coin.currency}")
@@ -143,7 +137,6 @@ data class Wallet(
                     .addOnFailureListener { e -> info("could not reset coins for $id's wallet - $e") }
         }
     }
-
 
     fun coinGoldValue(coin: Coin, rates: Rates?): Double {
         var g = .0

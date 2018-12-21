@@ -40,9 +40,6 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
         }
         if (wallet != null) {
             // set progress
-//            val p = wallet.coins.size
-//            wallet_progress_text.text = getString(R.string.coins_collected_progress, p)
-//            wallet_day_progressbar.progress = (p * 2)
 
             updateGoldChip()
             updateProgressBar()
@@ -105,7 +102,6 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
         bank_day_progressbar.progress = (wallet!!.bankedToday * 4)
     }
 
-
     class BankAdapter(private val wallet: Wallet,
                       private val rates: Rates?) :
             RecyclerView.Adapter<BankAdapter.BankViewHolder>(), AnkoLogger {
@@ -131,9 +127,6 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
                     .inflate(R.layout.item_bank, parent, false) as View
             // set the view's size, margins, padding and layout parameters
             itemView.padding = 20
-//        val p = 30
-//        itemView.setContentPadding(p, p, p, p)
-
             return BankViewHolder(itemView)
         }
 
@@ -181,11 +174,6 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
                     } else {
                         v.indefiniteSnackbar("Exchange rates missing! Please wait until the map has been downloaded and try again.").show()
                     }
-//                } else {
-//                    button.apply {
-//                        isClickable = false
-//                        isEnabled = false
-//                    }
                 }
             }
         }

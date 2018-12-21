@@ -102,6 +102,16 @@ data class Wallet(
         }
     }
 
+    fun resetBankedToday(q: Int) {
+        if (id != null) {
+            bankedToday = q
+            walletCollection.document(id)
+                    .update("bankedToday", bankedToday)
+                    .addOnSuccessListener { info("successfully reset bankedToday for $id") }
+                    .addOnFailureListener { info("could not reset bankedToday for $id") }
+        }
+    }
+
     // exchange a coin for its gold value
     fun bankCoin(coin: Coin, rates: Rates, callback: (Double?) -> Unit) {
         if (bankedToday < 25 && !coin.gone) {

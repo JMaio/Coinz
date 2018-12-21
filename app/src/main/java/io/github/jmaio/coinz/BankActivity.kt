@@ -94,13 +94,13 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
-    fun updateGoldChip() {
+    private fun updateGoldChip() {
         wallet?.gold.toString().split('.').let { (u, d) ->
             bank_gold_chip.text = getString(R.string.value_display, u, d.take(6))
         }
     }
 
-    fun updateProgressBar() {
+    private fun updateProgressBar() {
         bank_progress_text.text = getString(R.string.coins_banked_progress, wallet!!.bankedToday)
         bank_day_progressbar.progress = (wallet!!.bankedToday * 4)
     }
@@ -164,7 +164,7 @@ class BankActivity : AppCompatActivity(), AnkoLogger {
                         goldDec.text = d.take(3)
                     }
                 } catch (e: Exception) {
-                    holder.view.snackbar("Error: ${e.message}", "Dismiss", {})
+                    holder.view.snackbar("Error: ${e.message}", "Dismiss") {}
                 }
                 button.setOnClickListener { v ->
                     if (rates != null) {
